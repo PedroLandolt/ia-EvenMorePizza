@@ -1,4 +1,4 @@
-filePath = "b_little_bit_of_everything.in"
+filePath = "inputs/b_little_bit_of_everything.in"
 
 with open(filePath, "r") as file:
     lines = file.readlines()
