@@ -49,14 +49,43 @@ def menu():
             pizzas.update({(i, items[0]): items[1:]})
             i += 1
 
+
         print(teams)
         print("")
         print(pizzas)
 
-        print("\nBest Solution:")
-        best_solution = randomSolution(pizzas, teams)
+
+        # Random Solution
+        print("\nRandom Solution:")
+        random_solution = randomSolution(pizzas, teams)
+        print(random_solution)
+        print("Scores from each team:")
+        scores = evaluateSolution(random_solution, pizzas)
+        print(scores)
+        print("Total score: " + str(sum(scores)))
+
+
+        # Neighbour Solution
+        print("\nNeighbour Solution:")
+        new_solution = getNeighbourSolution(random_solution)
+        print(new_solution)
+        print("Scores from each team:")
+        scores = evaluateSolution(new_solution, pizzas)
+        print(scores)
+        print("Total score: " + str(sum(scores)))
+
+
+        # Hill Climbing Solution
+        print("\nHill Climbing Solution:")
+        iterations = 1000
+        best_solution = hillClimbing(iterations, pizzas, teams)
         print(best_solution)
+        print("\nScores from each team:")
+        scores = evaluateSolution(best_solution, pizzas)
+        print(scores)
+        print("Total score: " + str(sum(scores)))
         
+
         input("\nPress Enter to continue...")
 
 def subsetSum(target_sum, teams):
@@ -79,12 +108,10 @@ def subsetSum(target_sum, teams):
 
 def randomSolution(pizzas, teams):
     lenPizza = len(pizzas)
-    lenTeam = len(teams)
     cpPizzas = pizzas.copy()
     cpTeams = teams.copy()
 
     lenPizza -= 1
-
 
     pizzasForTeams = []
 
@@ -92,7 +119,7 @@ def randomSolution(pizzas, teams):
 
     while (cpTeams != {}):
         team = random.choice(list(cpTeams.keys()))
-        teamName = "Team with " + str(team) + " members."
+        teamName = "Team with " + str(team) + " members"
         if lenPizza < int(team):
             break
         else:
@@ -109,9 +136,58 @@ def randomSolution(pizzas, teams):
                 cpTeams[team] = int(cpTeams[team]) - 1
                 pizzasForTeams = []
 
-
     return solution
 
+def evaluateSolution(solution, pizzas):
+    scores = []
+    for team in solution:
+        team_pizzas = team[1]
+        team_pizzas_set = set()
+        for pizza in team_pizzas:
+            team_pizzas_set.update(pizzas[pizza])
+        scores.append(len(team_pizzas_set) ** 2)
+    return scores
+
+# swap a random pizza between two teams of the current solution
+def getNeighbourSolution(solution):
+    new_solution = solution.copy()
+
+    team1 = random.choice(new_solution)
+    team2 = random.choice(new_solution)
+
+    if len(new_solution) == 1:
+        return new_solution
+    
+    while team1 == team2:
+        team2 = random.choice(new_solution)
+
+    pizza1 = random.choice(team1[1])
+    pizza2 = random.choice(team2[1])
+
+    team1[1].remove(pizza1)
+    team2[1].remove(pizza2)
+    team1[1].append(pizza2)
+    team2[1].append(pizza1)
+
+    return new_solution
+
+def hillClimbing(iterations, pizzas, teams):
+    best_solution = randomSolution(pizzas, teams)
+    best_score = sum(evaluateSolution(best_solution, pizzas))
+
+    i = 0
+    while i < iterations:
+        i += 1
+        new_solution = getNeighbourSolution(best_solution)
+        new_score = sum(evaluateSolution(new_solution, pizzas))
+
+        if new_score > best_score:
+            best_solution = new_solution
+            best_score = new_score
+        else:
+            break
+
+    return best_solution
 
 menu()
 
