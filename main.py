@@ -1,3 +1,6 @@
+import numpy as np
+from itertools import combinations
+from itertools import combinations_with_replacement
 import random
 
 def menu():
@@ -50,19 +53,69 @@ def menu():
         print("")
         print(pizzas)
 
-        best_solution = initial_solution(pizzas, teams)
         print("\nBest Solution:")
+        best_solution = randomSolution(pizzas, teams)
         print(best_solution)
         
         input("\nPress Enter to continue...")
 
+def subsetSum(target_sum, teams):
+    team_counts = {int(k): int(v) for k, v in teams.items()}  # Convert keys and values to integers
+    
+    # Generate all possible combinations of teams
+    combinations_list = []
+    for team_size, count in team_counts.items():
+        for combo in combinations_with_replacement([team_size], count):
+            if sum(combo) <= target_sum:  # Ensure the combination doesn't exceed the target sum
+                combinations_list.append(combo)
+    
+    # Calculate the sum of each combination and count the occurrences
+    count_dict = {}
+    for combo in combinations_list:
+        combo_sum = sum(combo)
+        count_dict[combo_sum] = count_dict.get(combo_sum, 0) + 1
+    
+    return count_dict
+
+def randomSolution(pizzas, teams):
+    lenPizza = len(pizzas)
+    lenTeam = len(teams)
+    cpPizzas = pizzas.copy()
+    cpTeams = teams.copy()
+
+    cpTeams = subsetSum(lenPizza, cpTeams)
+
+    lenPizza -= 1
+
+    print (cpTeams)
 
 
-def initial_solution(pizzas, teams):
-    solution = {}
-    for (team_id, num_pizzas) in teams.items():
-        solution[team_id] = random.sample(list(pizzas.keys()), min(int(num_pizzas), len(pizzas)))
+    pizzasForTeams = []
+
+    solution = []
+
+    for team in cpTeams:
+        teamName = "Team with " + str(team) + " members."
+        if lenPizza < int(team):
+            break
+        else:
+            while int(cpTeams[team]) > 0:
+                if lenPizza == 0:
+                    break
+                tempNumMembers = int(team)
+                for i in range(int(tempNumMembers)):
+                    pizza = random.choice(list(cpPizzas.keys()))
+                    pizzasForTeams.append(pizza)
+                    cpPizzas.pop(pizza)
+                    lenPizza -= 1
+                solution.append((teamName, pizzasForTeams))
+                cpTeams[team] = int(cpTeams[team]) - 1
+                pizzasForTeams = []
+
+
     return solution
 
 
 menu()
+
+
