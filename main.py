@@ -83,18 +83,15 @@ def randomSolution(pizzas, teams):
     cpPizzas = pizzas.copy()
     cpTeams = teams.copy()
 
-    cpTeams = subsetSum(lenPizza, cpTeams)
-
     lenPizza -= 1
-
-    print (cpTeams)
 
 
     pizzasForTeams = []
 
     solution = []
 
-    for team in cpTeams:
+    while (cpTeams != {}):
+        team = random.choice(list(cpTeams.keys()))
         teamName = "Team with " + str(team) + " members."
         if lenPizza < int(team):
             break
