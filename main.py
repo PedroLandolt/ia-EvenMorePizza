@@ -80,31 +80,26 @@ def menu():
         iterations = 1000
         best_solution = hillClimbing(iterations, pizzas, teams)
         print(best_solution)
-        print("\nScores from each team:")
+        print("Scores from each team:")
+        scores = evaluateSolution(best_solution, pizzas)
+        print(scores)
+        print("Total score: " + str(sum(scores)))
+
+
+        # Simulated Annealing Solution
+        print("\nSimulated Annealing Solution:")
+        initialTemperature = 1000
+        finalTemperature = 0.1
+        coolingRate = 0.003
+        best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+        print(best_solution)
+        print("Scores from each team:")
         scores = evaluateSolution(best_solution, pizzas)
         print(scores)
         print("Total score: " + str(sum(scores)))
         
 
         input("\nPress Enter to continue...")
-
-def subsetSum(target_sum, teams):
-    team_counts = {int(k): int(v) for k, v in teams.items()}  # Convert keys and values to integers
-    
-    # Generate all possible combinations of teams
-    combinations_list = []
-    for team_size, count in team_counts.items():
-        for combo in combinations_with_replacement([team_size], count):
-            if sum(combo) <= target_sum:  # Ensure the combination doesn't exceed the target sum
-                combinations_list.append(combo)
-    
-    # Calculate the sum of each combination and count the occurrences
-    count_dict = {}
-    for combo in combinations_list:
-        combo_sum = sum(combo)
-        count_dict[combo_sum] = count_dict.get(combo_sum, 0) + 1
-    
-    return count_dict
 
 def randomSolution(pizzas, teams):
     lenPizza = len(pizzas)
@@ -123,7 +118,7 @@ def randomSolution(pizzas, teams):
         if lenPizza < int(team):
             break
         else:
-            while int(cpTeams[team]) > 0:
+            while int(cpTeams[team]) > 0 and cpPizzas:
                 if lenPizza == 0:
                     break
                 tempNumMembers = int(team)
@@ -137,6 +132,7 @@ def randomSolution(pizzas, teams):
                 pizzasForTeams = []
 
     return solution
+
 
 def evaluateSolution(solution, pizzas):
     scores = []
@@ -152,14 +148,13 @@ def evaluateSolution(solution, pizzas):
 def getNeighbourSolution(solution):
     new_solution = solution.copy()
 
-    team1 = random.choice(new_solution)
-    team2 = random.choice(new_solution)
+    if len(new_solution) < 2:
+        return new_solution  # Not enough teams for swapping
 
-    if len(new_solution) == 1:
-        return new_solution
-    
-    while team1 == team2:
-        team2 = random.choice(new_solution)
+    team1_index, team2_index = random.sample(range(len(new_solution)), 2)
+
+    team1 = new_solution[team1_index]
+    team2 = new_solution[team2_index]
 
     pizza1 = random.choice(team1[1])
     pizza2 = random.choice(team2[1])
@@ -189,6 +184,32 @@ def hillClimbing(iterations, pizzas, teams):
 
     return best_solution
 
+# simulated annealing
+def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate):
+    currentSolution = randomSolution(pizzas, teams)
+    currentScore = sum(evaluateSolution(currentSolution, pizzas))
+    bestSolution = currentSolution
+    bestScore = currentScore
+    temperature = initialTemperature
+
+    while temperature > finalTemperature:
+        newSolution = getNeighbourSolution(currentSolution)
+        newScore = sum(evaluateSolution(newSolution, pizzas))
+        scoreDifference = newScore - currentScore
+
+        if scoreDifference > 0:
+            currentSolution = newSolution
+            currentScore = newScore
+            if newScore > bestScore:
+                bestSolution = newSolution
+                bestScore = newScore
+        else:
+            if random.random() < np.exp(scoreDifference / temperature):
+                currentSolution = newSolution
+                currentScore = newScore
+
+        temperature *= 1 - coolingRate
+
+    return bestSolution
+
 menu()
-
-
