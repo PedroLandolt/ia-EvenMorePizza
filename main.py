@@ -322,6 +322,40 @@ def getNeighbourSolution(solution):
 
     return new_solution
 
+### Neighbour Solution ###
+def getNeighbourSolution2(solution, pizzas):
+    """Summary: Remove a pizza from a team and assign a not used pizza to it"""
+    
+    new_solution = solution.copy()
+    
+    team_index = random.randint(0, len(new_solution) - 1)
+    team = new_solution[team_index]
+    
+    if len(team[1]) == 0:
+        return new_solution
+    
+    pizza = random.choice(team[1])
+    team[1].remove(pizza)
+    
+    not_used_pizzas = set(pizzas.keys()) - set([pizza for team in new_solution for pizza in team[1]])
+    new_pizza = random.choice(list(not_used_pizzas))
+    team[1].append(new_pizza)
+    
+    return new_solution
+
+### Neighbour Solution ###
+def getNeighbourSolution3(solution, pizzas):
+    """Summary : Use both neighbour solutions 1 and 2"""
+    
+    new_solution = solution.copy()
+    
+    if random.random() < 0.5:
+        new_solution = getNeighbourSolution(new_solution)
+    else:
+        new_solution = getNeighbourSolution2(new_solution, pizzas)
+    
+    return new_solution
+
 #--------------------------------------------------------------------------------------------------------------#
 
 ### Optimization Algorithms ###
@@ -361,7 +395,10 @@ def randomSolution(pizzas, teams):
                 for _ in range(int(tempNumMembers)):
                     if lenPizza == 0:
                         break
-                    pizza = random.choice(list(cpPizzas.keys()))
+
+                    #sort cpPizzas by number of ingredients
+                    cpPizzas = dict(sorted(cpPizzas.items(), key=lambda item: len(item[1])))
+                    pizza = list(cpPizzas.keys())[0]
                     pizzasForTeams.append(pizza)
                     cpPizzas.pop(pizza)
                     lenPizza -= 1
@@ -392,7 +429,9 @@ def hillClimbing(iterations, pizzas, teams):
     i = 0
     while i < iterations:
         i += 1
-        new_solution = getNeighbourSolution(best_solution)
+        #new_solution = getNeighbourSolution(best_solution)
+        #new_solution = getNeighbourSolution2(best_solution, pizzas)
+        new_solution = getNeighbourSolution3(best_solution, pizzas)
         new_score = sum(evaluateSolution(new_solution, pizzas))
 
         if new_score > best_score:
@@ -427,7 +466,10 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
     temperature = initialTemperature
 
     while temperature > finalTemperature:
-        newSolution = getNeighbourSolution(currentSolution)
+        #newSolution = getNeighbourSolution(currentSolution)
+        #newSolution = getNeighbourSolution2(currentSolution, pizzas)
+        newSolution = getNeighbourSolution3(currentSolution, pizzas)
+
         newScore = sum(evaluateSolution(newSolution, pizzas))
         scoreDifference = newScore - currentScore
 
@@ -474,7 +516,10 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
 
     while i < maxIterations:
         i += 1
-        newSolution = getNeighbourSolution(currentSolution)
+        #newSolution = getNeighbourSolution(currentSolution)
+        #newSolution = getNeighbourSolution2(currentSolution, pizzas)
+        newSolution = getNeighbourSolution3(currentSolution, pizzas)
+
         newScore = sum(evaluateSolution(newSolution, pizzas))
 
         if newSolution not in tabuList:
