@@ -3,7 +3,14 @@ from itertools import combinations
 from itertools import combinations_with_replacement
 import random
 
-def menu():
+
+
+def clearScreen():
+    print("\033[H\033[J")
+    return
+
+"""
+def menuAll():
     choice = ""
     while choice != "f":
         print("\nChoose a file to read:")
@@ -125,36 +132,260 @@ def menu():
 
         input("\nPress Enter to continue...")
 
+    return
+"""
+
+def menuRunRandomSolution(teams, pizzas):
+
+    clearScreen()
+    print("Random Solution:")
+    random_solution = randomSolution(pizzas, teams)
+    print(random_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(random_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas)
+
+
+def menuRunHillClimbing(teams, pizzas):
+
+    clearScreen()
+    print("Hill Climbing Solution:")
+    print("\n")
+    iterations = int(input("Enter the number of iterations: "))
+    best_solution = hillClimbing(iterations, pizzas, teams)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas)
+
+
+def menuRunSimulatedAnnealing(teams, pizzas):
+
+    clearScreen()
+    print("Simulated Annealing Solution:")
+    print("\n")
+    initialTemperature = float(input("Enter the initial temperature: "))
+    finalTemperature = float(input("Enter the final temperature: "))
+    coolingRate = float(input("Enter the cooling rate: "))
+    best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas)
+
+
+def menuRunTabuSearch(teams, pizzas):
+    
+    clearScreen()
+    print("Tabu Search Solution:")
+    print("\n")
+    tabuListSize = int(input("Enter the tabu list size: "))
+    maxIterations = int(input("Enter the maximum number of iterations: "))
+    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas)
+
+
+def menuRunGeneticAlgorithm(teams, pizzas):
+    
+    clearScreen()
+    print("Genetic Algorithm Solution:")
+    print("\n")
+    population_size = int(input("Enter the population size: "))
+    tournament_size = int(input("Enter the tournament size: "))
+    mutation_rate = float(input("Enter the mutation rate: "))
+    max_generations = int(input("Enter the maximum number of generations: "))
+    best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas)
+
+
+def menuRunAll(teams, pizzas):
+
+    clearScreen()
+    print("Running all optimization algorithms with default parameters...")
+    print("\n")
+    print("Random Solution:")
+    random_solution = randomSolution(pizzas, teams)
+    print(random_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(random_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    print("\n")
+    print("Hill Climbing Solution:")
+    iterations = 1000
+    best_solution = hillClimbing(iterations, pizzas, teams)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    print("\n")
+    print("Simulated Annealing Solution:")
+    initialTemperature = 1000
+    finalTemperature = 0.1
+    coolingRate = 0.003
+    best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    print("\n")
+    print("Tabu Search Solution:")
+    tabuListSize = 10
+    maxIterations = 1000
+    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    print("\n")
+    print("Genetic Algorithm Solution:")
+    population_size = 100
+    tournament_size = 10
+    mutation_rate = 0.1
+    max_generations = 100
+    best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+    print(best_solution)
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas)
+
+def menuChooseOptimization(teams, pizzas):
+
+    clearScreen()
+    print("Choose an optimization algorithm:")
+    print("\n")
+    print("1. Random Solution")
+    print("2. Hill Climbing")
+    print("3. Simulated Annealing")
+    print("4. Tabu Search")
+    print("5. Genetic Algorithm")
+    print("7. Run all with default parameters")
+    print("\n")
+    print("0. Go back")
+    print("\n")
+    choice = input("\nEnter your choice: ")
+
+    if choice == "0":
+        menu()
+        return
+    
+    if choice == "1":
+        menuRunRandomSolution(teams, pizzas)
+    elif choice == "2":
+        menuRunHillClimbing(teams, pizzas)
+    elif choice == "3":
+        menuRunSimulatedAnnealing(teams, pizzas)
+    elif choice == "4":
+        menuRunTabuSearch(teams, pizzas)
+    elif choice == "5":
+        menuRunGeneticAlgorithm(teams, pizzas)
+    elif choice == "7":
+        menuRunAll(teams, pizzas)
+    else:
+        print("\nInvalid choice!")
+        print("Press Enter to go to main menu...")
+        choice = input()
+        menu()
+    
+    return
+    
+
+def menu():
+
+    clearScreen()
+    print("Choose a file to read:")
+    print("\n")
+    print("1. a_example")
+    print("2. b_little_bit_of_everything")
+    print("3. c_many_ingredients")
+    print("4. d_many_pizzas")
+    print("5. e_many_teams")
+    print("\n")
+    print("0. Exit")
+    print("\n")
+    choice = input("\nEnter your choice: ")
+
+    if choice == "0":
+        print("Exiting program...")
+        return
+    
+    file_mapping = {
+        "1": "inputs/a_example.in",
+        "2": "inputs/b_little_bit_of_everything.in",
+        "3": "inputs/c_many_ingredients.in",
+        "4": "inputs/d_many_pizzas.in",
+        "5": "inputs/e_many_teams.in"
+    }
+
+    filePath = file_mapping.get(choice)
+    if filePath is None:
+        print("\nInvalid choice!")
+        return
+    
+    with open(filePath, "r") as file:
+        lines = file.readlines()
+
+    initialInfo = lines[0].split()
+
+    teams = {}
+    print(initialInfo[0] + " pizzas")
+    for team in range(1, len(initialInfo)):
+        teams.update({team + 1: initialInfo[team]})
+
+    pizzas = {}
+    i = 0
+    for line in lines[1:]:
+        items = line.split()
+        pizzas.update({(i, items[0]): items[1:]})
+        i += 1
+
+    menuChooseOptimization(teams, pizzas)
+
+    return
+
 def randomSolution(pizzas, teams):
-    lenPizza = len(pizzas)
-    cpPizzas = pizzas.copy()
-    cpTeams = teams.copy()
-
-    lenPizza -= 1
-
-    pizzasForTeams = []
-
+    # Randomly assign pizzas to teams
     solution = []
-
-    while (cpTeams != {}):
-        team = random.choice(list(cpTeams.keys()))
-        teamName = "Team with " + str(team) + " members"
-        if lenPizza < int(team):
-            break
-        else:
-            while int(cpTeams[team]) > 0 and cpPizzas:
-                if lenPizza == 0:
-                    break
-                tempNumMembers = int(team)
-                for i in range(int(tempNumMembers)):
-                    pizza = random.choice(list(cpPizzas.keys()))
-                    pizzasForTeams.append(pizza)
-                    cpPizzas.pop(pizza)
-                    lenPizza -= 1
-                solution.append((teamName, pizzasForTeams))
-                cpTeams[team] = int(cpTeams[team]) - 1
-                pizzasForTeams = []
-
+    for team, pizza_count in teams.items():
+        team_pizzas = random.sample(pizzas.keys(), int(pizza_count))
+        solution.append((team, team_pizzas))
     return solution
 
 
