@@ -338,12 +338,39 @@ def randomSolution(pizzas, teams):
         list: A list of tuples containing the team and the pizzas assigned to it
     """
 
-    solution = []
-    for team, pizza_count in teams.items():
-        team_pizzas = random.sample(pizzas.keys(), int(pizza_count))
-        solution.append((team, team_pizzas))
-    return solution
+    lenPizza = len(pizzas)
+    cpPizzas = pizzas.copy()
+    cpTeams = teams.copy()
 
+    lenPizza -= 1
+
+    pizzasForTeams = []
+
+    solution = []
+
+    while (cpTeams != {}):
+        team = random.choice(list(cpTeams.keys()))
+        teamName = "Team with " + str(team) + " members"
+        if lenPizza < int(team):
+            break
+        else:
+            while int(cpTeams[team]) > 0:
+                if lenPizza == 0:
+                    break
+                tempNumMembers = int(team)
+                for _ in range(int(tempNumMembers)):
+                    if lenPizza == 0:
+                        break
+                    pizza = random.choice(list(cpPizzas.keys()))
+                    pizzasForTeams.append(pizza)
+                    cpPizzas.pop(pizza)
+                    lenPizza -= 1
+                solution.append((teamName, pizzasForTeams))
+                cpTeams[team] = int(cpTeams[team]) - 1
+                pizzasForTeams = []
+            cpTeams.pop(team)
+
+    return solution
 
 ### Hill Climbing ###
 def hillClimbing(iterations, pizzas, teams):
