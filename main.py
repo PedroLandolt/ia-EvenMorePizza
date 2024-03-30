@@ -376,8 +376,6 @@ def randomSolution(pizzas, teams):
     cpPizzas = pizzas.copy()
     cpTeams = teams.copy()
 
-    lenPizza -= 1
-
     pizzasForTeams = []
 
     solution = []
@@ -391,8 +389,8 @@ def randomSolution(pizzas, teams):
             while int(cpTeams[team]) > 0:
                 if lenPizza == 0:
                     break
-                tempNumMembers = int(team)
-                for _ in range(int(tempNumMembers)):
+                num_members = min(int(team), lenPizza)
+                for _ in range(num_members):
                     if lenPizza == 0:
                         break
 
