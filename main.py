@@ -459,7 +459,8 @@ def randomSolution(pizzas, teams):
         team = random.choice(list(cpTeams.keys()))
         teamName = "Team with " + str(team) + " members"
         if lenPizza < int(team):
-            break
+            cpTeams.pop(team)
+            continue
         else:
             while int(cpTeams[team]) > 0:
                 #print("inside while 2")
