@@ -16,7 +16,15 @@ def menuRunRandomSolution(teams, pizzas, fileName):
     clearScreen()
     print("Random Solution for " + fileName + " :")
     random_solution = randomSolution(pizzas, teams)
-    print(random_solution)
+    print("\n")
+    
+    print("Check the output folder for the solution file: " + fileName + "_random.out")    
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_random.out", "w") as file:
+        file.write(str(len(random_solution)) + "\n")
+        for team in random_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(random_solution, pizzas)
@@ -33,7 +41,14 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     print("\n")
     iterations = int(input("Enter the number of iterations: "))
     best_solution = hillClimbing(iterations, pizzas, teams)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_hill_climbing.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -52,7 +67,14 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
     finalTemperature = float(input("Enter the final temperature: "))
     coolingRate = float(input("Enter the cooling rate: "))
     best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_simulated_annealing.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_simulated_annealing.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -70,7 +92,14 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     tabuListSize = int(input("Enter the tabu list size: "))
     maxIterations = int(input("Enter the maximum number of iterations: "))
     best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_tabu_search.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -90,7 +119,14 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     mutation_rate = float(input("Enter the mutation rate: "))
     max_generations = int(input("Enter the maximum number of generations: "))
     best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_genetic_algorithm.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_genetic_algorithm.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -107,7 +143,14 @@ def menuRunAll(teams, pizzas, fileName):
     print("\n")
     print("Random Solution:")
     random_solution = randomSolution(pizzas, teams)
-    print(random_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_default_random.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_default_random.out", "w") as file:
+        file.write(str(len(random_solution)) + "\n")
+        for team in random_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(random_solution, pizzas)
@@ -117,7 +160,14 @@ def menuRunAll(teams, pizzas, fileName):
     print("Hill Climbing Solution:")
     iterations = 1000
     best_solution = hillClimbing(iterations, pizzas, teams)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_default_hill_climbing.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_default_hill_climbing.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -129,7 +179,14 @@ def menuRunAll(teams, pizzas, fileName):
     finalTemperature = 0.1
     coolingRate = 0.003
     best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_default_simulated_annealing.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_default_simulated_annealing.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -140,7 +197,14 @@ def menuRunAll(teams, pizzas, fileName):
     tabuListSize = 10
     maxIterations = 1000
     best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_default_tabu_search.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_default_tabu_search.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -153,7 +217,14 @@ def menuRunAll(teams, pizzas, fileName):
     mutation_rate = 0.1
     max_generations = 100
     best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
-    print(best_solution)
+    
+    print("Check the output folder for the solution file: " + fileName + "_default_genetic_algorithm.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_default_genetic_algorithm.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
     print("\n")
     print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
@@ -287,6 +358,9 @@ def evaluateSolution(solution, pizzas):
         team_pizzas_set = set()
         for pizza in team_pizzas:
             team_pizzas_set.update(pizzas[pizza])
+            #print("Pizza: ", pizza)
+            #print(pizzas[pizza])
+            #print(team_pizzas_set)
         scores.append(len(team_pizzas_set) ** 2)
     return scores
 
@@ -381,16 +455,19 @@ def randomSolution(pizzas, teams):
     solution = []
 
     while (cpTeams != {}):
+        #print("inside while")
         team = random.choice(list(cpTeams.keys()))
         teamName = "Team with " + str(team) + " members"
         if lenPizza < int(team):
             break
         else:
             while int(cpTeams[team]) > 0:
+                #print("inside while 2")
                 if lenPizza == 0:
                     break
                 num_members = min(int(team), lenPizza)
                 for _ in range(num_members):
+                    #print("inside for")
                     if lenPizza == 0:
                         break
 
