@@ -2,7 +2,7 @@ import numpy as np
 from itertools import combinations
 from itertools import combinations_with_replacement
 import random
-
+import matplotlib.pyplot as plt
 
 
 def clearScreen():
@@ -35,12 +35,13 @@ def menuRunRandomSolution(teams, pizzas, fileName):
 
 
 def menuRunHillClimbing(teams, pizzas, fileName):
-
     clearScreen()
     print("Hill Climbing Solution for " + fileName + " :")
     print("\n")
     iterations = int(input("Enter the number of iterations: "))
-    best_solution = hillClimbing(iterations, pizzas, teams)
+    
+    # Run hill climbing and get the best solution and iteration scores
+    best_solution, iteration_scores = hillClimbing(iterations, pizzas, teams)
     
     print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -54,6 +55,10 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    
+    # Plot the evolution of scores
+    plot_score_evolution(iteration_scores, "Hill Climbing")
+    
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
@@ -539,12 +544,10 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
     bestSolution = currentSolution
     bestScore = currentScore
     temperature = initialTemperature
+    iteration_scores = [bestScore]  # Initialize list to store scores at each iteration
 
     while temperature > finalTemperature:
-        #newSolution = getNeighbourSolution(currentSolution)
-        #newSolution = getNeighbourSolution2(currentSolution, pizzas)
         newSolution = getNeighbourSolution3(currentSolution, pizzas)
-
         newScore = sum(evaluateSolution(newSolution, pizzas))
         scoreDifference = newScore - currentScore
 
@@ -560,8 +563,9 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
                 currentScore = newScore
 
         temperature *= 1 - coolingRate
+        iteration_scores.append(bestScore)  # Append bestScore at each iteration
 
-    return bestSolution
+    return bestSolution, iteration_scores
 
 
 ### Tabu Search ###
@@ -735,6 +739,12 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
 
     return best_solution
 
+def plot_score_evolution(iteration_scores, algorithm_name):
+    plt.plot(range(len(iteration_scores)), iteration_scores)
+    plt.xlabel('Iteration')
+    plt.ylabel('Best Score')
+    plt.title('Evolution of Score during ' + algorithm_name)
+    plt.show()
 
 #--------------------------------------------------------------------------------------------------------------#
 
