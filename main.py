@@ -39,10 +39,35 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     clearScreen()
     print("Hill Climbing Solution for " + fileName + " :")
     print("\n")
-    iterations = int(input("Enter the number of iterations: "))
     
-    # Run hill climbing and get the best solution and iteration scores
-    best_solution = hillClimbing(iterations, pizzas, teams)
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        num_iterations = input("Enter the number of iterations for each run, separated by whitespaces (default: 10 100 1000): ")
+        if num_iterations == "":
+            iterations_list = [10, 100, 1000]
+        else:
+            iterations_list = [int(i) for i in num_iterations.split()]
+            if len(iterations_list) < 2 or len(iterations_list) > 3:
+                print("Please enter minimum 2 and maximum 3 values.")
+                return
+
+    else:
+        num_iterations = int(input("Enter the number of iterations: "))
+        iterations_list = [num_iterations]
+    
+    best_solution = []
+    best_score = float('-inf')
+    best_iterations = 0
+    
+    for iterations in iterations_list:
+        current_solution = hillClimbing(iterations, pizzas, teams)
+        current_score = sum(evaluateSolution(current_solution, pizzas))
+        
+        if current_score > best_score:
+            best_solution = current_solution
+            best_score = current_score
+            best_iterations = iterations
     
     print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -50,19 +75,17 @@ def menuRunHillClimbing(teams, pizzas, fileName):
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
+    
     print("\n")
-    print("Scores from each team:")
+    print("Number of iterations that produced the best solution:", best_iterations)
+    print("Scores from the best solution:")
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
     
-    # Plot the evolution of scores
-    #iteration_scores = best_solution
-    #plot_score_evolution(iteration_score, "Hill Climbing")
-    
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunSimulatedAnnealing(teams, pizzas, fileName):
@@ -70,24 +93,59 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
     clearScreen()
     print("Simulated Annealing Solution for " + fileName + " :")
     print("\n")
-    initialTemperature = float(input("Enter the initial temperature: "))
-    finalTemperature = float(input("Enter the final temperature: "))
-    coolingRate = float(input("Enter the cooling rate: "))
-    best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
-    print("Check the output folder for the solution file: " + fileName + "_simulated_annealing.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
-    with open("outputs/" + fileName + "_simulated_annealing.out", "w") as file:
-        file.write(str(len(best_solution)) + "\n")
-        for team in best_solution:
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        initialTemperatures_list = get_parameters("Enter the initial temperatures for each run, separated by whitespaces (default: 1000 5000 10000): ", [1000, 5000, 10000])
+        if initialTemperatures_list is None:
+            return
+        
+        finalTemperatures_list = get_parameters("Enter the final temperatures for each run, separated by whitespaces (default: 0.001 0.005 0.01): ", [0.001, 0.005, 0.01])
+        if finalTemperatures_list is None:
+            return
+        
+        coolingRates_list = get_parameters("Enter the cooling rates for each run, separated by whitespaces (default: 0.95 0.97 0.99): ", [0.95, 0.97, 0.99])
+        if coolingRates_list is None:
+            return
+    else:
+        initialTemperature = float(input("Enter the initial temperature: "))
+        finalTemperature = float(input("Enter the final temperature: "))
+        coolingRate = float(input("Enter the cooling rate: "))
+
+    best_solutions = []
+    iteration_scores_list = []
+    parameter_sets = []
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        for initialTemperature, finalTemperature, coolingRate in zip(initialTemperatures_list, finalTemperatures_list, coolingRates_list):
+            best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+            best_solutions.append(best_solution)
+            iteration_scores_list.append(iteration_score)
+            parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
+    else:
+        best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+        best_solutions.append(best_solution)
+        iteration_scores_list.append(iteration_score)
+        parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
+
+    best_index = max(range(len(iteration_scores_list)), key=lambda i: sum(iteration_scores_list[i]))
+    best_parameters = parameter_sets[best_index]
+    
+    print(f"The best set of parameters was: {best_parameters}")
+    print("Scores for each team:")
+    best_scores = evaluateSolution(best_solutions[best_index], pizzas)
+    print(best_scores)
+    print("Total score:", sum(best_scores))
+    
+    # Output the best solution to a file
+    output_file_name = f"outputs/{fileName}_simulated_annealing_best.out"
+    with open(output_file_name, "w") as file:
+        file.write(str(len(best_solutions[best_index])) + "\n")
+        for team in best_solutions[best_index]:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
-    plot_score_evolution(iteration_score, "Simulated Annealing")
+    print(f"Best solution saved to {output_file_name}")
+
+    plot_score_evolution_2(iteration_scores_list, "Simulated Annealing", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
@@ -997,6 +1055,27 @@ def plot_score_evolution(iteration_scores, algorithm_name):
     plt.xlabel('Iteration')
     plt.ylabel('Best Score')
     plt.title('Evolution of Score during ' + algorithm_name)
+    plt.show()
+
+def get_parameters(prompt, default_values):
+    user_input = input(prompt)
+    if user_input == "":
+        values_list = default_values
+    else:
+        values_list = [float(i) for i in user_input.split()]
+        if len(values_list) < 2 or len(values_list) > 3:
+            print(f"Please enter minimum 2 and maximum 3 values.")
+            return None
+    return values_list
+
+def plot_score_evolution_2(iteration_scores_list, algorithm_name, parameter_sets):
+    for idx, iteration_scores in enumerate(iteration_scores_list):
+        initial_temp, final_temp, cooling_rate = parameter_sets[idx]
+        plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {initial_temp}, {final_temp}, {cooling_rate}')
+    plt.xlabel('Iteration')
+    plt.ylabel('Best Score')
+    plt.title('Evolution of Score during ' + algorithm_name)
+    plt.legend()
     plt.show()
 
 #--------------------------------------------------------------------------------------------------------------#
