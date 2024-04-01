@@ -674,9 +674,9 @@ def evaluateSolution(solution, pizzas):
         team_pizzas_set = set()
         for pizza in team_pizzas:
             team_pizzas_set.update(pizzas[pizza])
-            #print("Pizza: ", pizza)
-            #print(pizzas[pizza])
-            #print(team_pizzas_set)
+            print("Pizza: ", pizza)
+            print(pizzas[pizza])
+            print(team_pizzas_set)
         scores.append(len(team_pizzas_set) ** 2)
     return scores
 
@@ -950,6 +950,7 @@ def initialize_population(pizzas, teams, population_size):
     Returns:
         list: A list of the population
     """
+    
     population = [randomSolution(pizzas, teams) for _ in range(population_size)]
     return population
 
@@ -1026,7 +1027,9 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
     Returns:
         list: A list of tuples containing the team and the pizzas assigned to it
     """
+
     start_time = time.time()
+
     population = initialize_population(pizzas, teams, population_size)
     best_solution = max(population, key=lambda x: sum(evaluateSolution(x, pizzas)))
     best_score = sum(evaluateSolution(best_solution, pizzas))
