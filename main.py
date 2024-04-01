@@ -477,9 +477,9 @@ def evaluateSolution(solution, pizzas):
         team_pizzas_set = set()
         for pizza in team_pizzas:
             team_pizzas_set.update(pizzas[pizza])
-            #print("Pizza: ", pizza)
-            #print(pizzas[pizza])
-            #print(team_pizzas_set)
+            print("Pizza: ", pizza)
+            print(pizzas[pizza])
+            print(team_pizzas_set)
         scores.append(len(team_pizzas_set) ** 2)
     return scores
 
@@ -785,7 +785,7 @@ def initialize_population(pizzas, teams, population_size):
     Returns:
         list: A list of the population
     """
-    print("Initializing Population")
+
     population = [randomSolution(pizzas, teams) for _ in range(population_size)]
     return population
 
@@ -802,7 +802,6 @@ def tournament_selection(population, tournament_size, pizzas):
     Returns:
         list: A list of 2 selected parents
     """
-    print("Tournament Selection")
     tournament = random.sample(population, tournament_size)
     tournament_scores = [sum(evaluateSolution(solution, pizzas)) for solution in tournament]
     parent1 = tournament[tournament_scores.index(max(tournament_scores))]
@@ -822,7 +821,6 @@ def single_point_crossover(parents):
         list: A list of 2 children
     """
     
-    print("Single Point Crossover")
     parent1, parent2 = parents
     crossover_point = random.randint(0, min(len(parent1), len(parent2)))
     child1 = parent1[:crossover_point] + parent2[crossover_point:]
@@ -842,7 +840,6 @@ def mutation(solution, mutation_rate, pizzas):
         list: A mutated solution
     """
     
-    print("Mutation")
     mutated_solution = solution.copy()
     for i, (team, pizzas_assigned) in enumerate(mutated_solution):
         if random.random() < mutation_rate:
@@ -865,8 +862,7 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
     Returns:
         list: A list of tuples containing the team and the pizzas assigned to it
     """
-    
-    print("Genetic Algorithm")
+
     population = initialize_population(pizzas, teams, population_size)
     best_solution = max(population, key=lambda x: sum(evaluateSolution(x, pizzas)))
     best_score = sum(evaluateSolution(best_solution, pizzas))
@@ -874,9 +870,7 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
 
     for generation in range(max_generations):
         new_population = []
-        print("New Population: ")
         for _ in range(population_size // 2):
-            print("Population Size: ", population_size)
             parent1, parent2 = tournament_selection(population, tournament_size, pizzas)
             child1, child2 = single_point_crossover([parent1, parent2])
             new_population.extend([mutation(child1, mutation_rate, pizzas), mutation(child2, mutation_rate, pizzas)])
@@ -884,7 +878,6 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
         scores = [sum(evaluateSolution(solution, pizzas)) for solution in population]
         best_solution_index = scores.index(max(scores))
         if scores[best_solution_index] > best_score:
-            print("Best Solution Index: ", best_solution_index)
             best_solution = population[best_solution_index]
             best_score = scores[best_solution_index]
         iteration_scores.append(best_score)
