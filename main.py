@@ -142,42 +142,90 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
     print("Total score:", sum(best_scores))
     
     # Output the best solution to a file
-    output_file_name = f"outputs/{fileName}_simulated_annealing_best.out"
+    print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
+    output_file_name = f"outputs/{fileName}_simulated_annealing.out"
     with open(output_file_name, "w") as file:
         file.write(str(len(best_solutions[best_index])) + "\n")
         for team in best_solutions[best_index]:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-    print(f"Best solution saved to {output_file_name}")
 
     plot_score_evolution_2(iteration_scores_list, "Simulated Annealing", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
-
 
 def menuRunTabuSearch(teams, pizzas, fileName):
     
     clearScreen()
     print("Tabu Search Solution for " + fileName + " :")
     print("\n")
-    tabuListSize = int(input("Enter the tabu list size: "))
-    maxIterations = int(input("Enter the maximum number of iterations: "))
-    best_solution, iteration_scores = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
-    
+
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        tabuListSizes_list = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [10, 20, 30])
+        if tabuListSizes_list is None:
+            return
+        
+        maxIterations_list = get_parameters("Enter the maximum number of iterations for each run, separated by whitespaces (default: 1000 5000 10000): ", [1000, 5000, 10000])
+        if maxIterations_list is None:
+            return
+    else:
+        tabuListSize = int(input("Enter the tabu list size: "))
+        maxIterations = int(input("Enter the maximum number of iterations: "))
+
+    best_solutions = []
+    iteration_scores_list = []
+    parameter_sets = []
+    best_score = float('-inf')
+    final_scores = float('-inf')
+
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        for tabuListSize, maxIterations in zip(tabuListSizes_list, maxIterations_list):
+            best_solution, iteration_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+            best_solutions.append(best_solution)
+            iteration_scores_list.append(iteration_score)
+            parameter_sets.append((tabuListSize, maxIterations))
+            if iteration_score[-1] >= best_score:
+                best_score = iteration_score[-1]
+    else:
+        best_solution, iteration_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+        best_solutions.append(best_solution)
+        iteration_scores_list.append(iteration_score)
+        parameter_sets.append((tabuListSize, maxIterations))
+        if iteration_score[-1] >= best_score:
+                best_score = iteration_score[-1]
+
+    print("Iteration Score :", iteration_scores_list)
+
+    print("Best Score :", best_score)
+   
+    best_score_index = iteration_scores_list.index(max(iteration_scores_list))
+    best_parameters = parameter_sets[best_score_index]
+    for solution in best_solutions:
+        scores = sum(evaluateSolution(solution, pizzas))
+        if scores == best_score:
+            best_solution = solution
+            final_scores = scores
+            break
+
+    print("Best Parameters (Tabu List Size, Max Iterations):", best_parameters)
+    print("Total Score", final_scores)
+
+
+
+
+    """# Output the best solution to a file
     print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
-    with open("outputs/" + fileName + "_tabu_search.out", "w") as file:
-        file.write(str(len(best_solution)) + "\n")
-        for team in best_solution:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
-    plot_score_evolution(iteration_scores, "Tabu Search")
+    output_file_name = f"outputs/{fileName}_tabu_search.out"
+    with open(output_file_name, "w") as file:
+        file.write(str(len(best_solutions[best_index])) + "\n")
+        for team in best_solutions[best_index]:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")"""
+
+    plot_score_evolution_2(iteration_scores_list, "Tabu Search", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunGeneticAlgorithm(teams, pizzas, fileName):
@@ -1073,9 +1121,14 @@ def get_parameters(prompt, default_values):
     return values_list
 
 def plot_score_evolution_2(iteration_scores_list, algorithm_name, parameter_sets):
-    for idx, iteration_scores in enumerate(iteration_scores_list):
-        initial_temp, final_temp, cooling_rate = parameter_sets[idx]
-        plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {initial_temp}, {final_temp}, {cooling_rate}')
+    if algorithm_name == "Simulated Annealing":
+        for idx, iteration_scores in enumerate(iteration_scores_list):
+            initial_temp, final_temp, cooling_rate = parameter_sets[idx]
+            plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {initial_temp}, {final_temp}, {cooling_rate}')
+    elif algorithm_name == "Tabu Search":
+        for idx, iteration_scores in enumerate(iteration_scores_list):
+            tabu_list_size, max_iterations = parameter_sets[idx]
+            plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {tabu_list_size}, {max_iterations}')
     plt.xlabel('Iteration')
     plt.ylabel('Best Score')
     plt.title('Evolution of Score during ' + algorithm_name)
