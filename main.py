@@ -3,6 +3,7 @@ from itertools import combinations
 from itertools import combinations_with_replacement
 import random
 import matplotlib.pyplot as plt
+import time
 
 
 def clearScreen():
@@ -361,11 +362,13 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(random_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    ra_score = evaluateSolution(random_solution, pizzas)
+    print(ra_score)
+    print("Total score: " + str(sum(ra_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in random_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in random_solution])))
+
+
     print("\n")
     print("Hill Climbing Solution:")
     iterations = 10000
@@ -380,11 +383,14 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    hc_score = evaluateSolution(best_solution, pizzas)
+    print(hc_score)
+    print("Total score: " + str(sum(hc_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+
+
+
     print("\n")
     print("Simulated Annealing Solution:")
     initialTemperature = 10000
@@ -401,11 +407,14 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    sa_score = evaluateSolution(best_solution, pizzas)
+    print(sa_score)
+    print("Total score: " + str(sum(sa_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+
+
+
     print("\n")
     print("Tabu Search Solution:")
     tabuListSize = 20
@@ -421,11 +430,14 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    tabu_score = evaluateSolution(best_solution, pizzas)
+    print(tabu_score)
+    print("Total score: " + str(sum(tabu_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+
+
+
     print("\n")
     print("Genetic Algorithm Solution:")
     population_size = 100
@@ -444,9 +456,9 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    ga_score = evaluateSolution(best_solution, pizzas)
+    print(ga_score)
+    print("Total score: " + str(sum(ga_score)))
     
     print("\n")
     print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
@@ -468,9 +480,9 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    hy_score = evaluateSolution(best_solution, pizzas)
+    print(hy_score)
+    print("Total score: " + str(sum(hy_score)))
     
     print("\n")
     print("Optimal Solution for " + fileName + " :")
@@ -485,23 +497,27 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    lo_scores = evaluateSolution(best_solution, pizzas)
+    print(lo_scores)
+    print("Total score: " + str(sum(lo_scores)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     
-    # Plotting
+    # List of algorithm names
+    algorithms = ["Random Solution", "Hill Climbing", "Simulated Annealing", "Tabu Search", "Genetic Algorithm", "Hybrid Tabu Search + Genetic Algorithm", "Local Optimal Solution"]
+
+    # List of scores corresponding to each algorithm
+    scores = [sum(ra_score), sum(hc_score), sum(sa_score), sum(tabu_score), sum(ga_score), sum(hy_score), sum(lo_scores)]
+
     plt.figure(figsize=(10, 6))
-    plt.plot(sa_iteration_score, label="Simulated Annealing")
-    plt.plot(tabu_iteration_score, label="Tabu Search")
-    plt.plot(ga_iteration_score, label="Genetic Algorithm")
-    plt.plot(hy_iteration_score, label="Hybrid Tabu Search + Genetic Algorithm")
-    plt.title("Score Evolution Comparison")
-    plt.xlabel("Iteration")
+
+    # Creating a bar chart
+    plt.bar(algorithms, scores)
+
+    plt.title("Score Comparison of Optimization Algorithms")
+    plt.xlabel("Algorithm")
     plt.ylabel("Score")
-    plt.legend()
-    plt.grid(True)
+    plt.grid(axis='y')
     plt.show()
         
     input("\nPress Enter to continue...")
@@ -762,48 +778,6 @@ def randomSolution(pizzas, teams):
             if cpTeams[team] == '0':
                 cpTeams.pop(team)
     
-    """
-    # Testei os outros Algoritmos com o Optimal Solution de base em vez do Random Solution
-    # Qualqer coisa é só descomentar o código acima e comentar o código abaixo
-    # Foi apenas uma questão de testar os algoritmos com um valor de base mais alto
-    # Sort pizzas by number of ingredients
-    pizzas = dict(sorted(pizzas.items(), key=lambda item: len(item[1]), reverse=True))
-    
-    solution = []
-    
-    # Assign pizzas to teams with 4 members
-    for _ in range(int(teams[4])):
-        if len(pizzas) < 4:
-            break
-        team_pizzas = []
-        for _ in range(4):
-            pizza = list(pizzas.keys())[0]
-            team_pizzas.append(pizza)
-            pizzas.pop(pizza)
-        solution.append(("Team with 4 members", team_pizzas))
-        
-    # Assign pizzas to teams with 3 members
-    for _ in range(int(teams[3])):
-        if len(pizzas) < 3:
-            break
-        team_pizzas = []
-        for _ in range(3):
-            pizza = list(pizzas.keys())[0]
-            team_pizzas.append(pizza)
-            pizzas.pop(pizza)
-        solution.append(("Team with 3 members", team_pizzas))
-        
-    # Assign pizzas to teams with 2 members
-    for _ in range(int(teams[2])):
-        if len(pizzas) < 2:
-            break
-        team_pizzas = []
-        for _ in range(2):
-            pizza = list(pizzas.keys())[0]
-            team_pizzas.append(pizza)
-            pizzas.pop(pizza)
-        solution.append(("Team with 2 members", team_pizzas))
-        """
     return solution
 
 ### Hill Climbing ###
@@ -822,6 +796,7 @@ def hillClimbing(iterations, pizzas, teams):
 
     best_solution = randomSolution(pizzas, teams)
     best_score = sum(evaluateSolution(best_solution, pizzas))
+    start_time = time.time()
     new_solution = []
     new_score = 0
     
@@ -836,6 +811,9 @@ def hillClimbing(iterations, pizzas, teams):
 
         else:
             break
+
+    end_time = time.time()
+    print("Time taken by Hill Climbing: ", "{:.4f}".format(end_time - start_time), " seconds")
             
     return best_solution
 
@@ -858,6 +836,7 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
 
     currentSolution = randomSolution(pizzas, teams)
     currentScore = sum(evaluateSolution(currentSolution, pizzas))
+    start_time = time.time()
     bestSolution = currentSolution
     bestScore = currentScore
     temperature = initialTemperature
@@ -882,6 +861,9 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
         temperature = max(temperature, finalTemperature)
         iteration_scores.append(bestScore)  # Append bestScore at each iteration
 
+    end_time = time.time()
+    print("Time taken by Annealing: ", "{:.4f}".format(end_time - start_time), " seconds")
+
     return bestSolution, iteration_scores
 
 
@@ -903,6 +885,7 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
     # Initialize current solution and best solution
     currentSolution = bestSolution = randomSolution(pizzas, teams)
     bestScore = sum(evaluateSolution(currentSolution, pizzas))
+    start_time = time.time()
     iteration_scores = [bestScore]
 
     # Initialize tabu list with the initial solution
@@ -931,6 +914,9 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
             # Limit the size of the tabu list
             if len(tabuList) > tabuListSize:
                 tabuList.pop(0)
+
+    end_time = time.time()
+    print("Time taken by Tabu: ", "{:.4f}".format(end_time - start_time), " seconds")
 
     return bestSolution, iteration_scores
 
@@ -1025,7 +1011,7 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
     Returns:
         list: A list of tuples containing the team and the pizzas assigned to it
     """
-    
+    start_time = time.time()
     population = initialize_population(pizzas, teams, population_size)
     best_solution = max(population, key=lambda x: sum(evaluateSolution(x, pizzas)))
     best_score = sum(evaluateSolution(best_solution, pizzas))
@@ -1044,6 +1030,9 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
             best_solution = population[best_solution_index]
             best_score = scores[best_solution_index]
         iteration_scores.append(best_score)
+
+    end_time = time.time()
+    print("Time taken by Genetic: ", "{:.4f}".format(end_time - start_time), " seconds")
     return best_solution, iteration_scores
 
 
@@ -1066,6 +1055,7 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
         list: A list of tuples containing the team and the pizzas assigned to it
     """
     # Initialize with a solution from Tabu Search
+    start_time = time.time()
     best_solution, tabu_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     best_score = sum(evaluateSolution(best_solution, pizzas))
     iteration_scores = [best_score]
@@ -1092,11 +1082,15 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
                 best_score = scores[best_solution_index]
             iteration_scores.append(best_score)
 
+    end_time = time.time()
+    print("Time taken by Hybrid: ", "{:.4f}".format(end_time - start_time), " seconds")
+
     return best_solution, iteration_scores
 
 
 def localOptimalSolution(pizzas, teams):
     
+    start_time = time.time()
     # Sort pizzas by number of ingredients
     pizzas = dict(sorted(pizzas.items(), key=lambda item: len(item[1]), reverse=True))
     
@@ -1134,6 +1128,9 @@ def localOptimalSolution(pizzas, teams):
             team_pizzas.append(pizza)
             pizzas.pop(pizza)
         solution.append(("Team with 2 members", team_pizzas))
+
+    end_time = time.time()
+    print("Time taken by Local Optimal: ", "{:.4f}".format(end_time - start_time), " seconds")
         
     return solution
 
