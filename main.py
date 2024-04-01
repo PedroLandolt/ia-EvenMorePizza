@@ -674,9 +674,6 @@ def evaluateSolution(solution, pizzas):
         team_pizzas_set = set()
         for pizza in team_pizzas:
             team_pizzas_set.update(pizzas[pizza])
-            print("Pizza: ", pizza)
-            print(pizzas[pizza])
-            print(team_pizzas_set)
         scores.append(len(team_pizzas_set) ** 2)
     return scores
 
