@@ -1,8 +1,7 @@
 import numpy as np
-from itertools import combinations
-from itertools import combinations_with_replacement
 import random
 import matplotlib.pyplot as plt
+import time
 
 
 def clearScreen():
@@ -39,30 +38,70 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     clearScreen()
     print("Hill Climbing Solution for " + fileName + " :")
     print("\n")
-    iterations = int(input("Enter the number of iterations: "))
     
-    # Run hill climbing and get the best solution and iteration scores
-    best_solution = hillClimbing(iterations, pizzas, teams)
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        num_iterations = input("Enter the number of iterations for each run, separated by whitespaces (default: 10 100 1000): ")
+        if num_iterations == "":
+            iterations_list = [1000, 5000, 10000]
+        else:
+            iterations_list = [int(i) for i in num_iterations.split()]
+            if len(iterations_list) < 2 or len(iterations_list) > 3:
+                print("Please enter minimum 2 and maximum 3 values.")
+                return
+
+    else:
+        num_iterations = int(input("Enter the number of iterations: "))
+        iterations_list = [num_iterations]
+    
+    # Lists to store scores obtained for each set of parameters
+    scores_list = []
+    iterations_used_list = []
+
+    best_solution = []
+    best_score = float('-inf')
+    best_iterations = 0
+    
+    for iterations in iterations_list:
+        current_solution = hillClimbing(iterations, pizzas, teams)
+        current_score = sum(evaluateSolution(current_solution, pizzas))
+        
+        # Store the scores obtained and the number of iterations used
+        scores_list.append(current_score)
+        iterations_used_list.append(iterations)
+        
+        if current_score > best_score:
+            best_solution = current_solution
+            best_score = current_score
+            best_iterations = iterations
+    
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(iterations) for iterations in iterations_used_list], scores_list)
+    plt.title("Score Comparison for Different Number of Iterations")
+    plt.xlabel("Number of Iterations")
+    plt.ylabel("Score")
+    plt.grid(axis='y')
+    plt.show()
+
     print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_hill_climbing.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
+    
     print("\n")
-    print("Scores from each team:")
+    print("Number of iterations that produced the best solution:", best_iterations)
+    print("Scores from the best solution:")
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
     
-    # Plot the evolution of scores
-    #iteration_scores = best_solution
-    #plot_score_evolution(iteration_scores, "Hill Climbing")
-    
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunSimulatedAnnealing(teams, pizzas, fileName):
@@ -70,25 +109,52 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
     clearScreen()
     print("Simulated Annealing Solution for " + fileName + " :")
     print("\n")
-    initialTemperature = float(input("Enter the initial temperature: "))
-    finalTemperature = float(input("Enter the final temperature: "))
-    coolingRate = float(input("Enter the cooling rate: "))
-    best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
-    print("Check the output folder for the solution file: " + fileName + "_simulated_annealing.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
-    with open("outputs/" + fileName + "_simulated_annealing.out", "w") as file:
-        file.write(str(len(best_solution)) + "\n")
-        for team in best_solution:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        initialTemperatures_list = get_parameters("Enter the initial temperatures for each run, separated by whitespaces (default: 1000 5000 10000): ", [1000, 5000, 10000])
+        if initialTemperatures_list is None:
+            return
+        
+        finalTemperatures_list = get_parameters("Enter the final temperatures for each run, separated by whitespaces (default: 0.001 0.005 0.01): ", [0.001, 0.005, 0.01])
+        if finalTemperatures_list is None:
+            return
+        
+        coolingRates_list = get_parameters("Enter the cooling rates for each run, separated by whitespaces (default: 0.95 0.97 0.99): ", [0.95, 0.97, 0.99])
+        if coolingRates_list is None:
+            return
+    else:
+        initialTemperature = float(input("Enter the initial temperature: "))
+        finalTemperature = float(input("Enter the final temperature: "))
+        coolingRate = float(input("Enter the cooling rate: "))
+
+    best_scores_list = []
+    parameter_sets = []
+
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        for initialTemperature, finalTemperature, coolingRate in zip(initialTemperatures_list, finalTemperatures_list, coolingRates_list):
+            best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+            best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
+            parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
+    else:
+        best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+        best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
+        parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
+
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(parameters) for parameters in parameter_sets], best_scores_list)
+    plt.title("Score Comparison for Different Parameter Sets")
+    plt.xlabel("Parameter Set")
+    plt.ylabel("Score")
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis='y')
+    plt.tight_layout()
+    plt.show()
+
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunTabuSearch(teams, pizzas, fileName):
@@ -96,24 +162,48 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     clearScreen()
     print("Tabu Search Solution for " + fileName + " :")
     print("\n")
-    tabuListSize = int(input("Enter the tabu list size: "))
-    maxIterations = int(input("Enter the maximum number of iterations: "))
-    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     
-    print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
-    with open("outputs/" + fileName + "_tabu_search.out", "w") as file:
-        file.write(str(len(best_solution)) + "\n")
-        for team in best_solution:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [15, 20, 40], int)
+        if tabuListSizes is None:
+            return
+        
+        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 10000 20000 30000): ", [8000, 10000, 20000], int)
+        if maxIterationsList is None:
+            return
+    else:
+        tabuListSize = int(input("Enter the tabu list size: "))
+        maxIterations = int(input("Enter the maximum number of iterations: "))
+
+    best_scores_list = []
+    parameter_sets = []
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        for tabuListSize, maxIterations in zip(tabuListSizes, maxIterationsList):
+            best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+            best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
+            parameter_sets.append((tabuListSize, maxIterations))
+    else:
+        best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+        best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
+        parameter_sets.append((tabuListSize, maxIterations))
+
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(parameters) for parameters in parameter_sets], best_scores_list)
+    plt.title("Score Comparison for Different Parameter Sets")
+    plt.xlabel("Parameter Set")
+    plt.ylabel("Score")
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis='y')
+    plt.tight_layout()
+    plt.show()
+
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunGeneticAlgorithm(teams, pizzas, fileName):
@@ -121,26 +211,68 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     clearScreen()
     print("Genetic Algorithm Solution for " + fileName + " :")
     print("\n")
-    population_size = int(input("Enter the population size: "))
-    tournament_size = int(input("Enter the tournament size: "))
-    mutation_rate = float(input("Enter the mutation rate: "))
-    max_generations = int(input("Enter the maximum number of generations: "))
-    best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
     
-    print("Check the output folder for the solution file: " + fileName + "_genetic_algorithm.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
-    with open("outputs/" + fileName + "_genetic_algorithm.out", "w") as file:
-        file.write(str(len(best_solution)) + "\n")
-        for team in best_solution:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+
+    # list of inputs - balanced values, large population, small tournament size, high mutation rate, extended generations
+    
+    parameter_descriptions = [
+        "Balanced Values", 
+        "Large Population", 
+        "Small Tournament Size", 
+        "High Mutation Rate", 
+        "Extended Generations"
+    ]
+
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        population_sizes = get_parameters_genetic("Enter the population sizes for each run, separated by whitespaces (default: 50 100 50 75 60): ", [50, 100, 50, 75, 60], int)
+        if population_sizes is None:
+            return
+        
+        tournament_sizes = get_parameters_genetic("Enter the tournament sizes for each run, separated by whitespaces (default: 5 10 3 8 6): ", [5, 10, 3, 8, 6], int)
+        if tournament_sizes is None:
+            return
+        
+        mutation_rates = get_parameters_genetic("Enter the mutation rates for each run, separated by whitespaces (default: 0.05 0.1 0.05 0.2 0.1): ", [0.05, 0.1, 0.05, 0.2, 0.1])
+        if mutation_rates is None:
+            return
+        
+        max_generations_list = get_parameters_genetic("Enter the maximum generations for each run, separated by whitespaces (default: 100 200 150 120 300): ", [100, 100, 100, 100, 100], int)
+        if max_generations_list is None:
+            return
+    else:
+        population_size = int(input("Enter the population size: "))
+        tournament_size = int(input("Enter the tournament size: "))
+        mutation_rate = float(input("Enter the mutation rate: "))
+        max_generations = int(input("Enter the maximum number of generations: "))
+
+    best_scores_list = []
+    parameter_sets = []
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        for i, (population_size, tournament_size, mutation_rate, max_generations) in enumerate(zip(population_sizes, tournament_sizes, mutation_rates, max_generations_list)):
+            best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+            best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
+            parameter_sets.append(parameter_descriptions[i])
+    else:
+        best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+        best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
+        parameter_sets.append(parameter_descriptions[0])
+
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar(parameter_sets, best_scores_list)
+    plt.title("Score Comparison for Different Parameter Sets")
+    plt.xlabel("Parameter Set Description")
+    plt.ylabel("Score")
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis='y')
+    plt.tight_layout()
+    plt.show()
+
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunHybridTabuGenetic(teams, pizzas, fileName):
@@ -211,11 +343,13 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(random_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    ra_score = evaluateSolution(random_solution, pizzas)
+    print(ra_score)
+    print("Total score: " + str(sum(ra_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in random_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in random_solution])))
+
+
     print("\n")
     print("Hill Climbing Solution:")
     iterations = 10000
@@ -230,17 +364,20 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    hc_score = evaluateSolution(best_solution, pizzas)
+    print(hc_score)
+    print("Total score: " + str(sum(hc_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+
+
+
     print("\n")
     print("Simulated Annealing Solution:")
     initialTemperature = 10000
     finalTemperature = 0.001
     coolingRate = 0.95
-    best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
     
     print("Check the output folder for the solution file: " + fileName + "_default_simulated_annealing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -251,11 +388,14 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    sa_score = evaluateSolution(best_solution, pizzas)
+    print(sa_score)
+    print("Total score: " + str(sum(sa_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+
+
+
     print("\n")
     print("Tabu Search Solution:")
     tabuListSize = 20
@@ -271,11 +411,14 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    tabu_score = evaluateSolution(best_solution, pizzas)
+    print(tabu_score)
+    print("Total score: " + str(sum(tabu_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+
+
+
     print("\n")
     print("Genetic Algorithm Solution:")
     population_size = 100
@@ -294,10 +437,10 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
-    """
+    ga_score = evaluateSolution(best_solution, pizzas)
+    print(ga_score)
+    print("Total score: " + str(sum(ga_score)))
+    
     print("\n")
     print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
     print("\n")
@@ -318,10 +461,9 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
-    """
+    hy_score = evaluateSolution(best_solution, pizzas)
+    print(hy_score)
+    print("Total score: " + str(sum(hy_score)))
     
     print("\n")
     print("Optimal Solution for " + fileName + " :")
@@ -336,12 +478,28 @@ def menuRunAll(teams, pizzas, fileName):
             
     print("\n")
     print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    lo_scores = evaluateSolution(best_solution, pizzas)
+    print(lo_scores)
+    print("Total score: " + str(sum(lo_scores)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     
+    # List of algorithm names
+    algorithms = ["Random Solution", "Hill Climbing", "Simulated Annealing", "Tabu Search", "Genetic Algorithm", "Hybrid Tabu Search + Genetic Algorithm", "Local Optimal Solution"]
+
+    # List of scores corresponding to each algorithm
+    scores = [sum(ra_score), sum(hc_score), sum(sa_score), sum(tabu_score), sum(ga_score), sum(hy_score), sum(lo_scores)]
+
+    plt.figure(figsize=(10, 6))
+
+    # Creating a bar chart
+    plt.bar(algorithms, scores)
+
+    plt.title("Score Comparison of Optimization Algorithms")
+    plt.xlabel("Algorithm")
+    plt.ylabel("Score")
+    plt.grid(axis='y')
+    plt.show()
         
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
@@ -601,48 +759,6 @@ def randomSolution(pizzas, teams):
             if cpTeams[team] == '0':
                 cpTeams.pop(team)
     
-    """
-    # Testei os outros Algoritmos com o Optimal Solution de base em vez do Random Solution
-    # Qualqer coisa é só descomentar o código acima e comentar o código abaixo
-    # Foi apenas uma questão de testar os algoritmos com um valor de base mais alto
-    # Sort pizzas by number of ingredients
-    pizzas = dict(sorted(pizzas.items(), key=lambda item: len(item[1]), reverse=True))
-    
-    solution = []
-    
-    # Assign pizzas to teams with 4 members
-    for _ in range(int(teams[4])):
-        if len(pizzas) < 4:
-            break
-        team_pizzas = []
-        for _ in range(4):
-            pizza = list(pizzas.keys())[0]
-            team_pizzas.append(pizza)
-            pizzas.pop(pizza)
-        solution.append(("Team with 4 members", team_pizzas))
-        
-    # Assign pizzas to teams with 3 members
-    for _ in range(int(teams[3])):
-        if len(pizzas) < 3:
-            break
-        team_pizzas = []
-        for _ in range(3):
-            pizza = list(pizzas.keys())[0]
-            team_pizzas.append(pizza)
-            pizzas.pop(pizza)
-        solution.append(("Team with 3 members", team_pizzas))
-        
-    # Assign pizzas to teams with 2 members
-    for _ in range(int(teams[2])):
-        if len(pizzas) < 2:
-            break
-        team_pizzas = []
-        for _ in range(2):
-            pizza = list(pizzas.keys())[0]
-            team_pizzas.append(pizza)
-            pizzas.pop(pizza)
-        solution.append(("Team with 2 members", team_pizzas))
-        """
     return solution
 
 ### Hill Climbing ###
@@ -661,6 +777,7 @@ def hillClimbing(iterations, pizzas, teams):
 
     best_solution = randomSolution(pizzas, teams)
     best_score = sum(evaluateSolution(best_solution, pizzas))
+    start_time = time.time()
     new_solution = []
     new_score = 0
     
@@ -675,6 +792,9 @@ def hillClimbing(iterations, pizzas, teams):
 
         else:
             break
+
+    end_time = time.time()
+    print("Time taken by Hill Climbing: ", "{:.4f}".format(end_time - start_time), " seconds")
             
     return best_solution
 
@@ -697,10 +817,10 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
 
     currentSolution = randomSolution(pizzas, teams)
     currentScore = sum(evaluateSolution(currentSolution, pizzas))
+    start_time = time.time()
     bestSolution = currentSolution
     bestScore = currentScore
     temperature = initialTemperature
-    iteration_scores = [bestScore]  # Initialize list to store scores at each iteration
 
     while temperature > finalTemperature:
         newSolution = getNeighbourSolution3(currentSolution, pizzas)
@@ -719,9 +839,11 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
 
         temperature *= 1 - coolingRate
         temperature = max(temperature, finalTemperature)
-        iteration_scores.append(bestScore)  # Append bestScore at each iteration
 
-    return bestSolution, iteration_scores
+    end_time = time.time()
+    print("Time taken by Annealing: ", "{:.4f}".format(end_time - start_time), " seconds")
+
+    return bestSolution
 
 
 ### Tabu Search ###
@@ -742,6 +864,7 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
     # Initialize current solution and best solution
     currentSolution = bestSolution = randomSolution(pizzas, teams)
     bestScore = sum(evaluateSolution(currentSolution, pizzas))
+    start_time = time.time()
 
     # Initialize tabu list with the initial solution
     tabuList = [currentSolution]
@@ -768,6 +891,9 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
             if len(tabuList) > tabuListSize:
                 tabuList.pop(0)
 
+    end_time = time.time()
+    print("Time taken by Tabu: ", "{:.4f}".format(end_time - start_time), " seconds")
+
     return bestSolution
 
 
@@ -785,7 +911,7 @@ def initialize_population(pizzas, teams, population_size):
     Returns:
         list: A list of the population
     """
-
+    
     population = [randomSolution(pizzas, teams) for _ in range(population_size)]
     return population
 
@@ -839,7 +965,7 @@ def mutation(solution, mutation_rate, pizzas):
     Returns:
         list: A mutated solution
     """
-    
+
     mutated_solution = solution.copy()
     for i, (team, pizzas_assigned) in enumerate(mutated_solution):
         if random.random() < mutation_rate:
@@ -863,10 +989,11 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
         list: A list of tuples containing the team and the pizzas assigned to it
     """
 
+    start_time = time.time()
+
     population = initialize_population(pizzas, teams, population_size)
     best_solution = max(population, key=lambda x: sum(evaluateSolution(x, pizzas)))
     best_score = sum(evaluateSolution(best_solution, pizzas))
-    iteration_scores = [best_score]
 
     for generation in range(max_generations):
         new_population = []
@@ -880,7 +1007,9 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
         if scores[best_solution_index] > best_score:
             best_solution = population[best_solution_index]
             best_score = scores[best_solution_index]
-        iteration_scores.append(best_score)
+
+    end_time = time.time()
+    print("Time taken by Genetic: ", "{:.4f}".format(end_time - start_time), " seconds")
     return best_solution
 
 
@@ -903,6 +1032,7 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
         list: A list of tuples containing the team and the pizzas assigned to it
     """
     # Initialize with a solution from Tabu Search
+    start_time = time.time()
     best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     best_score = sum(evaluateSolution(best_solution, pizzas))
 
@@ -927,11 +1057,15 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
                 best_solution = population[best_solution_index]
                 best_score = scores[best_solution_index]
 
+    end_time = time.time()
+    print("Time taken by Hybrid: ", "{:.4f}".format(end_time - start_time), " seconds")
+
     return best_solution
 
 
 def localOptimalSolution(pizzas, teams):
     
+    start_time = time.time()
     # Sort pizzas by number of ingredients
     pizzas = dict(sorted(pizzas.items(), key=lambda item: len(item[1]), reverse=True))
     
@@ -969,6 +1103,9 @@ def localOptimalSolution(pizzas, teams):
             team_pizzas.append(pizza)
             pizzas.pop(pizza)
         solution.append(("Team with 2 members", team_pizzas))
+
+    end_time = time.time()
+    print("Time taken by Local Optimal: ", "{:.4f}".format(end_time - start_time), " seconds")
         
     return solution
 
@@ -976,12 +1113,30 @@ def localOptimalSolution(pizzas, teams):
 
 #--------------------------------------------------------------------------------------------------------------#
 
-def plot_score_evolution(iteration_scores, algorithm_name):
-    plt.plot(range(len(iteration_scores)), iteration_scores)
-    plt.xlabel('Iteration')
-    plt.ylabel('Best Score')
-    plt.title('Evolution of Score during ' + algorithm_name)
-    plt.show()
+
+
+def get_parameters(prompt, default_values, data_type=float):
+    user_input = input(prompt)
+    if user_input == "":
+        values_list = default_values
+    else:
+        values_list = [data_type(i) for i in user_input.split()]
+        if len(values_list) < 2 or len(values_list) > 3:
+            print(f"Please enter minimum 2 and maximum 3 values.")
+            return None
+    return values_list
+
+def get_parameters_genetic(prompt, default_values, data_type=float):
+    user_input = input(prompt)
+    if user_input == "":
+        values_list = default_values
+    else:
+        values_list = [data_type(i) for i in user_input.split()]
+        if len(values_list) < 2 or len(values_list) > 5:
+            print(f"Please enter minimum 2 and maximum 5 values.")
+            return None
+    return values_list
+
 
 #--------------------------------------------------------------------------------------------------------------#
 
