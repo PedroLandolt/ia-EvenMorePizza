@@ -1,6 +1,4 @@
 import numpy as np
-from itertools import combinations
-from itertools import combinations_with_replacement
 import random
 import matplotlib.pyplot as plt
 import time
@@ -216,8 +214,16 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     
     run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
 
-    #list of inputs - balanced values, large population, small tournament size, high mutation rate, extended generations
+    # list of inputs - balanced values, large population, small tournament size, high mutation rate, extended generations
     
+    parameter_descriptions = [
+        "Balanced Values", 
+        "Large Population", 
+        "Small Tournament Size", 
+        "High Mutation Rate", 
+        "Extended Generations"
+    ]
+
     if run_multiple_times == "yes" or run_multiple_times == "y":
         population_sizes = get_parameters_genetic("Enter the population sizes for each run, separated by whitespaces (default: 50 100 50 75 60): ", [50, 100, 50, 75, 60], int)
         if population_sizes is None:
@@ -244,20 +250,20 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     parameter_sets = []
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
-        for population_size, tournament_size, mutation_rate, max_generations in zip(population_sizes, tournament_sizes, mutation_rates, max_generations_list):
+        for i, (population_size, tournament_size, mutation_rate, max_generations) in enumerate(zip(population_sizes, tournament_sizes, mutation_rates, max_generations_list)):
             best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
             best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
-            parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
+            parameter_sets.append(parameter_descriptions[i])
     else:
         best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
-        parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
+        parameter_sets.append(parameter_descriptions[0])
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
-    plt.bar([str(parameters) for parameters in parameter_sets], best_scores_list)
+    plt.bar(parameter_sets, best_scores_list)
     plt.title("Score Comparison for Different Parameter Sets")
-    plt.xlabel("Parameter Set")
+    plt.xlabel("Parameter Set Description")
     plt.ylabel("Score")
     plt.xticks(rotation=45, ha="right")
     plt.grid(axis='y')
