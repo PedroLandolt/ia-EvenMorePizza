@@ -75,15 +75,6 @@ def menuRunHillClimbing(teams, pizzas, fileName):
             best_solution = current_solution
             best_score = current_score
             best_iterations = iterations
-    
-    # Plotting the comparison
-    plt.figure(figsize=(10, 6))
-    plt.bar([str(iterations) for iterations in iterations_used_list], scores_list)
-    plt.title("Score Comparison for Different Number of Iterations")
-    plt.xlabel("Number of Iterations")
-    plt.ylabel("Score")
-    plt.grid(axis='y')
-    plt.show()
 
     print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -98,6 +89,15 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(iterations) for iterations in iterations_used_list], scores_list)
+    plt.title("Score Comparison for Different Number of Iterations")
+    plt.xlabel("Number of Iterations")
+    plt.ylabel("Score")
+    plt.grid(axis='y')
+    plt.show()
     
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
@@ -140,6 +140,19 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
         best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
+
+    print("Check the output folder for the solution file: " + fileName + "_simulated_annealing.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_simulated_annealing.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from the best solution:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
@@ -189,6 +202,19 @@ def menuRunTabuSearch(teams, pizzas, fileName):
         best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((tabuListSize, maxIterations))
+
+    print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_tabu_search.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from the best solution:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
@@ -258,6 +284,19 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
         best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append(parameter_descriptions[0])
+
+    print("Check the output folder for the solution file: " + fileName + "_genetic.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_genetic.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from the best solution:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
