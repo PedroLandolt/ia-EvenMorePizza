@@ -224,21 +224,23 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     print("\n")
     
     run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+
+    #list of inputs - balanced values, large population, small tournament size, high mutation rate, extended generations
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
-        population_sizes = get_parameters("Enter the population sizes for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300], int)
+        population_sizes = get_parameters_genetic("Enter the population sizes for each run, separated by whitespaces (default: 50 100 50 75 60): ", [50, 100, 50, 75, 60], int)
         if population_sizes is None:
             return
         
-        tournament_sizes = get_parameters("Enter the tournament sizes for each run, separated by whitespaces (default: 5 10 15): ", [5, 10, 15], int)
+        tournament_sizes = get_parameters_genetic("Enter the tournament sizes for each run, separated by whitespaces (default: 5 10 3 8 6): ", [5, 10, 3, 8, 6], int)
         if tournament_sizes is None:
             return
         
-        mutation_rates = get_parameters("Enter the mutation rates for each run, separated by whitespaces (default: 0.01 0.05 0.1): ", [0.01, 0.05, 0.1])
+        mutation_rates = get_parameters_genetic("Enter the mutation rates for each run, separated by whitespaces (default: 0.05 0.1 0.05 0.2 0.1): ", [0.05, 0.1, 0.05, 0.2, 0.1])
         if mutation_rates is None:
             return
         
-        max_generations_list = get_parameters("Enter the maximum generations for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300], int)
+        max_generations_list = get_parameters_genetic("Enter the maximum generations for each run, separated by whitespaces (default: 100 200 150 120 300): ", [100, 100, 100, 100, 100], int)
         if max_generations_list is None:
             return
     else:
@@ -445,7 +447,7 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
-    """
+    
     print("\n")
     print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
     print("\n")
@@ -455,7 +457,7 @@ def menuRunAll(teams, pizzas, fileName):
     tournament_size = 5     # int(input("Enter the tournament size: "))
     mutation_rate = 0.2     # float(input("Enter the mutation rate: "))
     max_generations = 100   # int(input("Enter the maximum number of generations: "))
-    best_solution, iteration_score = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
+    best_solution, hy_iteration_score = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -469,7 +471,6 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
-    """
     
     print("\n")
     print("Optimal Solution for " + fileName + " :")
@@ -495,6 +496,7 @@ def menuRunAll(teams, pizzas, fileName):
     plt.plot(sa_iteration_score, label="Simulated Annealing")
     plt.plot(tabu_iteration_score, label="Tabu Search")
     plt.plot(ga_iteration_score, label="Genetic Algorithm")
+    plt.plot(hy_iteration_score, label="Hybrid Tabu Search + Genetic Algorithm")
     plt.title("Score Evolution Comparison")
     plt.xlabel("Iteration")
     plt.ylabel("Score")
@@ -1064,7 +1066,7 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
         list: A list of tuples containing the team and the pizzas assigned to it
     """
     # Initialize with a solution from Tabu Search
-    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    best_solution, tabu_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     best_score = sum(evaluateSolution(best_solution, pizzas))
     iteration_scores = [best_score]
 
@@ -1154,6 +1156,17 @@ def get_parameters(prompt, default_values, data_type=float):
         values_list = [data_type(i) for i in user_input.split()]
         if len(values_list) < 2 or len(values_list) > 3:
             print(f"Please enter minimum 2 and maximum 3 values.")
+            return None
+    return values_list
+
+def get_parameters_genetic(prompt, default_values, data_type=float):
+    user_input = input(prompt)
+    if user_input == "":
+        values_list = default_values
+    else:
+        values_list = [data_type(i) for i in user_input.split()]
+        if len(values_list) < 2 or len(values_list) > 5:
+            print(f"Please enter minimum 2 and maximum 5 values.")
             return None
     return values_list
 
