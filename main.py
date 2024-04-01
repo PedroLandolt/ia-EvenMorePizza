@@ -222,27 +222,72 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     clearScreen()
     print("Genetic Algorithm Solution for " + fileName + " :")
     print("\n")
-    population_size = int(input("Enter the population size: "))
-    tournament_size = int(input("Enter the tournament size: "))
-    mutation_rate = float(input("Enter the mutation rate: "))
-    max_generations = int(input("Enter the maximum number of generations: "))
-    best_solution, iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
     
+    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        population_sizes = get_parameters("Enter the population sizes for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300])
+        if population_sizes is None:
+            return
+        
+        tournament_sizes = get_parameters("Enter the tournament sizes for each run, separated by whitespaces (default: 5 10 15): ", [5, 10, 15])
+        if tournament_sizes is None:
+            return
+        
+        mutation_rates = get_parameters("Enter the mutation rates for each run, separated by whitespaces (default: 0.01 0.05 0.1): ", [0.01, 0.05, 0.1])
+        if mutation_rates is None:
+            return
+        
+        max_generations_list = get_parameters("Enter the maximum generations for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300])
+        if max_generations_list is None:
+            return
+    else:
+        population_size = int(input("Enter the population size: "))
+        tournament_size = int(input("Enter the tournament size: "))
+        mutation_rate = float(input("Enter the mutation rate: "))
+        max_generations = int(input("Enter the maximum number of generations: "))
+
+    best_solutions = []
+    iteration_scores_list = []
+    parameter_sets = []
+    
+    if run_multiple_times == "yes" or run_multiple_times == "y":
+        for population_size, tournament_size, mutation_rate, max_generations in zip(population_sizes, tournament_sizes, mutation_rates, max_generations_list):
+            best_solution, iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+            best_solutions.append(best_solution)
+            iteration_scores_list.append(iteration_score)
+            parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
+    else:
+        best_solution, iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+        best_solutions.append(best_solution)
+        iteration_scores_list.append(iteration_score)
+        parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
+
+    # Calculate final scores for each solution
+    final_scores_list = [sum(evaluateSolution(solution, pizzas)) for solution in best_solutions]
+    
+    # Select the solution with the highest final score
+    best_index = final_scores_list.index(max(final_scores_list))
+    best_parameters = parameter_sets[best_index]
+    
+    print(f"The best set of parameters was: {best_parameters}")
+    print("Scores for each team:")
+    best_scores = evaluateSolution(best_solutions[best_index], pizzas)
+    print(best_scores)
+    print("Total score:", sum(best_scores))
+    
+    # Output the best solution to a file
     print("Check the output folder for the solution file: " + fileName + "_genetic_algorithm.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
-    with open("outputs/" + fileName + "_genetic_algorithm.out", "w") as file:
-        file.write(str(len(best_solution)) + "\n")
-        for team in best_solution:
+    output_file_name = f"outputs/{fileName}_genetic_algorithm.out"
+    with open(output_file_name, "w") as file:
+        file.write(str(len(best_solutions[best_index])) + "\n")
+        for team in best_solutions[best_index]:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
-    scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
-    plot_score_evolution(iteration_score, "Genetic Algorithm")
+
+    plot_score_evolution_2(iteration_scores_list, "Genetic Algorithm", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunHybridTabuGenetic(teams, pizzas, fileName):
@@ -1118,6 +1163,10 @@ def plot_score_evolution_2(iteration_scores_list, algorithm_name, parameter_sets
         for idx, iteration_scores in enumerate(iteration_scores_list):
             tabu_list_size, max_iterations = parameter_sets[idx]
             plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {tabu_list_size}, {max_iterations}')
+    elif algorithm_name == "Genetic Algorithm":
+        for idx, iteration_scores in enumerate(iteration_scores_list):
+            population_size, tournament_size, mutation_rate, max_generations = parameter_sets[idx]
+            plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {population_size}, {tournament_size}, {mutation_rate}, {max_generations}')
     plt.xlabel('Iteration')
     plt.ylabel('Best Score')
     plt.title('Evolution of Score during ' + algorithm_name)
