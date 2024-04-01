@@ -128,7 +128,11 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
         iteration_scores_list.append(iteration_score)
         parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
 
-    best_index = max(range(len(iteration_scores_list)), key=lambda i: sum(iteration_scores_list[i]))
+    # Calculate final scores for each solution
+    final_scores_list = [sum(evaluateSolution(solution, pizzas)) for solution in best_solutions]
+    
+    # Select the solution with the highest final score
+    best_index = final_scores_list.index(max(final_scores_list))
     best_parameters = parameter_sets[best_index]
     
     print(f"The best set of parameters was: {best_parameters}")
