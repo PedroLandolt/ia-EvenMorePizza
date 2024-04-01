@@ -57,6 +57,10 @@ def menuRunHillClimbing(teams, pizzas, fileName):
         num_iterations = int(input("Enter the number of iterations: "))
         iterations_list = [num_iterations]
     
+    # Lists to store scores obtained for each set of parameters
+    scores_list = []
+    iterations_used_list = []
+
     best_solution = []
     best_score = float('-inf')
     best_iterations = 0
@@ -65,11 +69,24 @@ def menuRunHillClimbing(teams, pizzas, fileName):
         current_solution = hillClimbing(iterations, pizzas, teams)
         current_score = sum(evaluateSolution(current_solution, pizzas))
         
+        # Store the scores obtained and the number of iterations used
+        scores_list.append(current_score)
+        iterations_used_list.append(iterations)
+        
         if current_score > best_score:
             best_solution = current_solution
             best_score = current_score
             best_iterations = iterations
     
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(iterations) for iterations in iterations_used_list], scores_list)
+    plt.title("Score Comparison for Different Number of Iterations")
+    plt.xlabel("Number of Iterations")
+    plt.ylabel("Score")
+    plt.grid(axis='y')
+    plt.show()
+
     print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_hill_climbing.out", "w") as file:
@@ -113,43 +130,33 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
         finalTemperature = float(input("Enter the final temperature: "))
         coolingRate = float(input("Enter the cooling rate: "))
 
-    best_solutions = []
+    best_scores_list = []
     parameter_sets = []
-    
+
     if run_multiple_times == "yes" or run_multiple_times == "y":
         for initialTemperature, finalTemperature, coolingRate in zip(initialTemperatures_list, finalTemperatures_list, coolingRates_list):
             best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
-            best_solutions.append(best_solution)
+            best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
             parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
     else:
         best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
-        best_solutions.append(best_solution)
+        best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
 
-    # Calculate final scores for each solution
-    final_scores_list = [sum(evaluateSolution(solution, pizzas)) for solution in best_solutions]
-    
-    # Select the solution with the highest final score
-    best_index = final_scores_list.index(max(final_scores_list))
-    best_parameters = parameter_sets[best_index]
-    
-    print(f"The best set of parameters was: {best_parameters}")
-    print("Scores for each team:")
-    best_scores = evaluateSolution(best_solutions[best_index], pizzas)
-    print(best_scores)
-    print("Total score:", sum(best_scores))
-    
-    # Output the best solution to a file
-    output_file_name = f"outputs/{fileName}_simulated_annealing_best.out"
-    with open(output_file_name, "w") as file:
-        file.write(str(len(best_solutions[best_index])) + "\n")
-        for team in best_solutions[best_index]:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-    print(f"Best solution saved to {output_file_name}")
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(parameters) for parameters in parameter_sets], best_scores_list)
+    plt.title("Score Comparison for Different Parameter Sets")
+    plt.xlabel("Parameter Set")
+    plt.ylabel("Score")
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis='y')
+    plt.tight_layout()
+    plt.show()
 
-    plot_score_evolution_2(iteration_scores_list, "Simulated Annealing", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
+
 
 
 def menuRunTabuSearch(teams, pizzas, fileName):
@@ -172,41 +179,30 @@ def menuRunTabuSearch(teams, pizzas, fileName):
         tabuListSize = int(input("Enter the tabu list size: "))
         maxIterations = int(input("Enter the maximum number of iterations: "))
 
-    best_solutions = []
+    best_scores_list = []
     parameter_sets = []
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         for tabuListSize, maxIterations in zip(tabuListSizes, maxIterationsList):
             best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
-            best_solutions.append(best_solution)
+            best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
             parameter_sets.append((tabuListSize, maxIterations))
     else:
         best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
-        best_solutions.append(best_solution)
+        best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((tabuListSize, maxIterations))
 
-    # Calculate final scores for each solution
-    final_scores_list = [sum(evaluateSolution(solution, pizzas)) for solution in best_solutions]
-    
-    # Select the solution with the highest final score
-    best_index = final_scores_list.index(max(final_scores_list))
-    best_parameters = parameter_sets[best_index]
-    
-    print(f"The best set of parameters was: {best_parameters}")
-    print("Scores for each team:")
-    best_scores = evaluateSolution(best_solutions[best_index], pizzas)
-    print(best_scores)
-    print("Total score:", sum(best_scores))
-    
-    # Output the best solution to a file
-    print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
-    output_file_name = f"outputs/{fileName}_tabu_search.out"
-    with open(output_file_name, "w") as file:
-        file.write(str(len(best_solutions[best_index])) + "\n")
-        for team in best_solutions[best_index]:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(parameters) for parameters in parameter_sets], best_scores_list)
+    plt.title("Score Comparison for Different Parameter Sets")
+    plt.xlabel("Parameter Set")
+    plt.ylabel("Score")
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis='y')
+    plt.tight_layout()
+    plt.show()
 
-    plot_score_evolution_2(iteration_scores_list, "Tabu Search", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
@@ -244,41 +240,30 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
         mutation_rate = float(input("Enter the mutation rate: "))
         max_generations = int(input("Enter the maximum number of generations: "))
 
-    best_solutions = []
+    best_scores_list = []
     parameter_sets = []
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         for population_size, tournament_size, mutation_rate, max_generations in zip(population_sizes, tournament_sizes, mutation_rates, max_generations_list):
             best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
-            best_solutions.append(best_solution)
+            best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
             parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
     else:
         best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
-        best_solutions.append(best_solution)
+        best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
 
-    # Calculate final scores for each solution
-    final_scores_list = [sum(evaluateSolution(solution, pizzas)) for solution in best_solutions]
-    
-    # Select the solution with the highest final score
-    best_index = final_scores_list.index(max(final_scores_list))
-    best_parameters = parameter_sets[best_index]
-    
-    print(f"The best set of parameters was: {best_parameters}")
-    print("Scores for each team:")
-    best_scores = evaluateSolution(best_solutions[best_index], pizzas)
-    print(best_scores)
-    print("Total score:", sum(best_scores))
-    
-    # Output the best solution to a file
-    print("Check the output folder for the solution file: " + fileName + "_genetic_algorithm.out")
-    output_file_name = f"outputs/{fileName}_genetic_algorithm.out"
-    with open(output_file_name, "w") as file:
-        file.write(str(len(best_solutions[best_index])) + "\n")
-        for team in best_solutions[best_index]:
-            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+    # Plotting the comparison
+    plt.figure(figsize=(10, 6))
+    plt.bar([str(parameters) for parameters in parameter_sets], best_scores_list)
+    plt.title("Score Comparison for Different Parameter Sets")
+    plt.xlabel("Parameter Set")
+    plt.ylabel("Score")
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(axis='y')
+    plt.tight_layout()
+    plt.show()
 
-    plot_score_evolution_2(iteration_scores_list, "Genetic Algorithm", parameter_sets)
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
@@ -309,7 +294,6 @@ def menuRunHybridTabuGenetic(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
-    plot_score_evolution(iteration_score, "Hybrid Tabu Search + Genetic Algorithm")
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
@@ -1120,12 +1104,7 @@ def localOptimalSolution(pizzas, teams):
 
 #--------------------------------------------------------------------------------------------------------------#
 
-def plot_score_evolution(iteration_scores, algorithm_name):
-    plt.plot(range(len(iteration_scores)), iteration_scores)
-    plt.xlabel('Iteration')
-    plt.ylabel('Best Score')
-    plt.title('Evolution of Score during ' + algorithm_name)
-    plt.show()
+
 
 def get_parameters(prompt, default_values, data_type=float):
     user_input = input(prompt)
@@ -1149,24 +1128,6 @@ def get_parameters_genetic(prompt, default_values, data_type=float):
             return None
     return values_list
 
-def plot_score_evolution_2(iteration_scores_list, algorithm_name, parameter_sets):
-    if algorithm_name == "Simulated Annealing":
-        for idx, iteration_scores in enumerate(iteration_scores_list):
-            initial_temp, final_temp, cooling_rate = parameter_sets[idx]
-            plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {initial_temp}, {final_temp}, {cooling_rate}')
-    elif algorithm_name == "Tabu Search":
-        for idx, iteration_scores in enumerate(iteration_scores_list):
-            tabu_list_size, max_iterations = parameter_sets[idx]
-            plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {tabu_list_size}, {max_iterations}')
-    elif algorithm_name == "Genetic Algorithm":
-        for idx, iteration_scores in enumerate(iteration_scores_list):
-            population_size, tournament_size, mutation_rate, max_generations = parameter_sets[idx]
-            plt.plot(range(len(iteration_scores)), iteration_scores, label=f'Parameters: {population_size}, {tournament_size}, {mutation_rate}, {max_generations}')
-    plt.xlabel('Iteration')
-    plt.ylabel('Best Score')
-    plt.title('Evolution of Score during ' + algorithm_name)
-    plt.legend()
-    plt.show()
 
 #--------------------------------------------------------------------------------------------------------------#
 
