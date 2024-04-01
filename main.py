@@ -16,30 +16,26 @@ def menuRunRandomSolution(teams, pizzas, fileName):
     clearScreen()
     print("Random Solution for " + fileName + " :")
     random_solution = randomSolution(pizzas, teams)
-    print("\n")
-    
-    print("Check the output folder for the solution file: " + fileName + "_random.out")    
+    print("\nCheck the output folder for the solution file: " + fileName + "_random.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_random.out", "w") as file:
         file.write(str(len(random_solution)) + "\n")
         for team in random_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
 
-    print("\n")
-    print("Scores from each team:")
     scores = evaluateSolution(random_solution, pizzas)
-    print(scores)
     print("Total score: " + str(sum(scores)))
-    input("\nPress Enter to continue...")
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in random_solution])))
+    
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 
 def menuRunHillClimbing(teams, pizzas, fileName):
     clearScreen()
     print("Hill Climbing Solution for " + fileName + " :")
-    print("\n")
     
-    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    run_multiple_times = input("\nDo you want to run the algorithm multiple times for comparison? (y/n): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         num_iterations = input("Enter the number of iterations for each run, separated by whitespaces (default: 10 100 1000): ")
@@ -76,19 +72,18 @@ def menuRunHillClimbing(teams, pizzas, fileName):
             best_score = current_score
             best_iterations = iterations
 
-    print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
+    
+    print("\nCheck the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_hill_climbing.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
     
-    print("\n")
-    print("Number of iterations that produced the best solution:", best_iterations)
-    print("Scores from the best solution:")
+    print("\nNumber of iterations that produced the best solution:", best_iterations)
     scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
@@ -99,7 +94,7 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     plt.grid(axis='y')
     plt.show()
     
-    input("\nPress Enter to continue...")
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 
@@ -108,8 +103,8 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
 
     clearScreen()
     print("Simulated Annealing Solution for " + fileName + " :")
-    print("\n")
-    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    
+    run_multiple_times = input("\nDo you want to run the algorithm multiple times for comparison? (y/n): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         initialTemperatures_list = get_parameters("Enter the initial temperatures for each run, separated by whitespaces (default: 1000 5000 10000): ", [1000, 5000, 10000])
@@ -141,18 +136,18 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
 
-    print("Check the output folder for the solution file: " + fileName + "_simulated_annealing.out")
+    print("\nCheck the output folder for the solution file: " + fileName + "_simulated_annealing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_simulated_annealing.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from the best solution:")
+
     scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
-    print("Total score: " + str(sum(scores)))
+    print("\nTotal score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
@@ -165,7 +160,7 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
     plt.tight_layout()
     plt.show()
 
-    input("\nPress Enter to continue...")
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 
@@ -174,9 +169,8 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     
     clearScreen()
     print("Tabu Search Solution for " + fileName + " :")
-    print("\n")
     
-    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    run_multiple_times = input("\nDo you want to run the algorithm multiple times for comparison? (y/n): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 15 20 40): ", [15, 20, 40], int)
@@ -203,18 +197,17 @@ def menuRunTabuSearch(teams, pizzas, fileName):
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append((tabuListSize, maxIterations))
 
-    print("Check the output folder for the solution file: " + fileName + "_tabu_search.out")
+    print("\nCheck the output folder for the solution file: " + fileName + "_tabu_search.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_tabu_search.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from the best solution:")
     scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
+    
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
@@ -227,7 +220,7 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     plt.tight_layout()
     plt.show()
 
-    input("\nPress Enter to continue...")
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 
@@ -236,9 +229,8 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     
     clearScreen()
     print("Genetic Algorithm Solution for " + fileName + " :")
-    print("\n")
     
-    run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
+    run_multiple_times = input("\nDo you want to run the algorithm multiple times for comparison? (y/n): ").lower()
 
     # list of inputs - balanced values, large population, small tournament size, high mutation rate, extended generations
     
@@ -285,18 +277,17 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
         best_scores_list.append(sum(evaluateSolution(best_solution, pizzas)))
         parameter_sets.append(parameter_descriptions[0])
 
-    print("Check the output folder for the solution file: " + fileName + "_genetic.out")
+    print("\nCheck the output folder for the solution file: " + fileName + "_genetic.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_genetic.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from the best solution:")
+
     scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
+
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
 
     # Plotting the comparison
     plt.figure(figsize=(10, 6))
@@ -309,7 +300,7 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     plt.tight_layout()
     plt.show()
 
-    input("\nPress Enter to continue...")
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 
@@ -318,8 +309,8 @@ def menuRunHybridTabuGenetic(teams, pizzas, fileName):
     
     clearScreen()
     print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
-    print("\n")
-    tabuListSize    = int(input("Enter the tabu list size: "))
+    
+    tabuListSize    = int(input("\nEnter the tabu list size: "))
     maxIterations   = int(input("Enter the maximum number of iterations: "))
     population_size = int(input("Enter the population size: "))
     tournament_size = int(input("Enter the tournament size: "))
@@ -327,19 +318,19 @@ def menuRunHybridTabuGenetic(teams, pizzas, fileName):
     max_generations = int(input("Enter the maximum number of generations: "))
     best_solution = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
     
-    print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
+    print("\nCheck the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_hybrid_tabu_genetic.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
     print("Total score: " + str(sum(scores)))
-    input("\nPress Enter to continue...")
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    
+    
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 
@@ -347,22 +338,20 @@ def menuRunOptimalSolution(teams, pizzas, fileName):
 
     clearScreen()
     print("Optimal Solution for " + fileName + " :")
-    print("\n")
     best_solution = localOptimalSolution(pizzas, teams)
     
-    print("Check the output folder for the solution file: " + fileName + "_optimal.out")
+    print("\nCheck the output folder for the solution file: " + fileName + "_optimal.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
     with open("outputs/" + fileName + "_optimal.out", "w") as file:
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     scores = evaluateSolution(best_solution, pizzas)
-    print(scores)
     print("Total score: " + str(sum(scores)))
-    input("\nPress Enter to continue...")
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    
+    input("\n\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
 def menuRunAll(teams, pizzas, fileName):
@@ -379,14 +368,10 @@ def menuRunAll(teams, pizzas, fileName):
         file.write(str(len(random_solution)) + "\n")
         for team in random_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
+
     ra_score = evaluateSolution(random_solution, pizzas)
-    print(ra_score)
     print("Total score: " + str(sum(ra_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in random_solution])))
-    print("Max number of Order: " + str(max([len(team[1]) for team in random_solution])))
 
 
     print("\n")
@@ -401,13 +386,9 @@ def menuRunAll(teams, pizzas, fileName):
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     hc_score = evaluateSolution(best_solution, pizzas)
-    print(hc_score)
     print("Total score: " + str(sum(hc_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
-    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
 
 
 
@@ -425,14 +406,9 @@ def menuRunAll(teams, pizzas, fileName):
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     sa_score = evaluateSolution(best_solution, pizzas)
-    print(sa_score)
     print("Total score: " + str(sum(sa_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
-    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
-
 
 
     print("\n")
@@ -447,14 +423,10 @@ def menuRunAll(teams, pizzas, fileName):
         file.write(str(len(best_solution)) + "\n")
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
-            
-    print("\n")
-    print("Scores from each team:")
+
     tabu_score = evaluateSolution(best_solution, pizzas)
-    print(tabu_score)
     print("Total score: " + str(sum(tabu_score)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
-    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
 
 
 
@@ -474,21 +446,20 @@ def menuRunAll(teams, pizzas, fileName):
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     ga_score = evaluateSolution(best_solution, pizzas)
-    print(ga_score)
     print("Total score: " + str(sum(ga_score)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    
+    
     
     print("\n")
     print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
-    print("\n")
-    tabuListSize = 20       # int(input("Enter the tabu list size: "))
-    maxIterations = 10000   # int(input("Enter the maximum number of iterations: "))
-    population_size = 100   # int(input("Enter the population size: "))
-    tournament_size = 5     # int(input("Enter the tournament size: "))
-    mutation_rate = 0.2     # float(input("Enter the mutation rate: "))
-    max_generations = 100   # int(input("Enter the maximum number of generations: "))
+    tabuListSize = 20       
+    maxIterations = 10000   
+    population_size = 100   
+    tournament_size = 5     
+    mutation_rate = 0.2     
+    max_generations = 100   
     best_solution = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
@@ -498,15 +469,14 @@ def menuRunAll(teams, pizzas, fileName):
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     hy_score = evaluateSolution(best_solution, pizzas)
-    print(hy_score)
     print("Total score: " + str(sum(hy_score)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    
+    
     
     print("\n")
     print("Optimal Solution for " + fileName + " :")
-    print("\n")
     best_solution = localOptimalSolution(pizzas, teams)
     print("Check the output folder for the solution file: " + fileName + "_default_optimal.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -515,13 +485,9 @@ def menuRunAll(teams, pizzas, fileName):
         for team in best_solution:
             file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
             
-    print("\n")
-    print("Scores from each team:")
     lo_scores = evaluateSolution(best_solution, pizzas)
-    print(lo_scores)
     print("Total score: " + str(sum(lo_scores)))
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
-    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     
     # List of algorithm names
     algorithms = ["Random Solution", "Hill Climbing", "Simulated Annealing", "Tabu Search", "Genetic Algorithm", "Hybrid Tabu Search + Genetic Algorithm", "Local Optimal Solution"]
