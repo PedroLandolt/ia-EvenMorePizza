@@ -45,7 +45,7 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     if run_multiple_times == "yes" or run_multiple_times == "y":
         num_iterations = input("Enter the number of iterations for each run, separated by whitespaces (default: 10 100 1000): ")
         if num_iterations == "":
-            iterations_list = [10, 100, 1000]
+            iterations_list = [1000, 5000, 10000]
         else:
             iterations_list = [int(i) for i in num_iterations.split()]
             if len(iterations_list) < 2 or len(iterations_list) > 3:
@@ -163,11 +163,11 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
-        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [10, 20, 30], int)
+        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [15, 20, 40], int)
         if tabuListSizes is None:
             return
         
-        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 10000 20000 30000): ", [10000, 20000, 30000], int)
+        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 10000 20000 30000): ", [8000, 10000, 20000], int)
         if maxIterationsList is None:
             return
     else:
