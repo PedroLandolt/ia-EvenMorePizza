@@ -388,7 +388,7 @@ def menuRunAll(teams, pizzas, fileName):
     initialTemperature = 10000
     finalTemperature = 0.001
     coolingRate = 0.95
-    best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    best_solution, sa_iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
     
     print("Check the output folder for the solution file: " + fileName + "_default_simulated_annealing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -408,7 +408,7 @@ def menuRunAll(teams, pizzas, fileName):
     print("Tabu Search Solution:")
     tabuListSize = 20
     maxIterations = 10000
-    best_solution, iteration_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    best_solution, tabu_iteration_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     
     print("Check the output folder for the solution file: " + fileName + "_default_tabu_search.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -431,7 +431,7 @@ def menuRunAll(teams, pizzas, fileName):
     mutation_rate = 0.1
     max_generations = 100
     
-    best_solution, iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+    best_solution, ga_iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_default_genetic_algorithm.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -490,6 +490,17 @@ def menuRunAll(teams, pizzas, fileName):
     print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
     print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.plot(sa_iteration_score, label="Simulated Annealing")
+    plt.plot(tabu_iteration_score, label="Tabu Search")
+    plt.plot(ga_iteration_score, label="Genetic Algorithm")
+    plt.title("Score Evolution Comparison")
+    plt.xlabel("Iteration")
+    plt.ylabel("Score")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
         
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
