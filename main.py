@@ -114,19 +114,16 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
         coolingRate = float(input("Enter the cooling rate: "))
 
     best_solutions = []
-    iteration_scores_list = []
     parameter_sets = []
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         for initialTemperature, finalTemperature, coolingRate in zip(initialTemperatures_list, finalTemperatures_list, coolingRates_list):
-            best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+            best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
             best_solutions.append(best_solution)
-            iteration_scores_list.append(iteration_score)
             parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
     else:
-        best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+        best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
         best_solutions.append(best_solution)
-        iteration_scores_list.append(iteration_score)
         parameter_sets.append((initialTemperature, finalTemperature, coolingRate))
 
     # Calculate final scores for each solution
@@ -176,19 +173,16 @@ def menuRunTabuSearch(teams, pizzas, fileName):
         maxIterations = int(input("Enter the maximum number of iterations: "))
 
     best_solutions = []
-    iteration_scores_list = []
     parameter_sets = []
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         for tabuListSize, maxIterations in zip(tabuListSizes, maxIterationsList):
-            best_solution, iteration_scores = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+            best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
             best_solutions.append(best_solution)
-            iteration_scores_list.append(iteration_scores)
             parameter_sets.append((tabuListSize, maxIterations))
     else:
-        best_solution, iteration_scores = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+        best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
         best_solutions.append(best_solution)
-        iteration_scores_list.append(iteration_scores)
         parameter_sets.append((tabuListSize, maxIterations))
 
     # Calculate final scores for each solution
@@ -251,19 +245,16 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
         max_generations = int(input("Enter the maximum number of generations: "))
 
     best_solutions = []
-    iteration_scores_list = []
     parameter_sets = []
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
         for population_size, tournament_size, mutation_rate, max_generations in zip(population_sizes, tournament_sizes, mutation_rates, max_generations_list):
-            best_solution, iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+            best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
             best_solutions.append(best_solution)
-            iteration_scores_list.append(iteration_score)
             parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
     else:
-        best_solution, iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+        best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
         best_solutions.append(best_solution)
-        iteration_scores_list.append(iteration_score)
         parameter_sets.append((population_size, tournament_size, mutation_rate, max_generations))
 
     # Calculate final scores for each solution
@@ -304,7 +295,7 @@ def menuRunHybridTabuGenetic(teams, pizzas, fileName):
     tournament_size = int(input("Enter the tournament size: "))
     mutation_rate   = float(input("Enter the mutation rate: "))
     max_generations = int(input("Enter the maximum number of generations: "))
-    best_solution, iteration_score = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
+    best_solution = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -840,7 +831,6 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
     bestSolution = currentSolution
     bestScore = currentScore
     temperature = initialTemperature
-    iteration_scores = [bestScore]  # Initialize list to store scores at each iteration
 
     while temperature > finalTemperature:
         newSolution = getNeighbourSolution3(currentSolution, pizzas)
@@ -859,12 +849,11 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
 
         temperature *= 1 - coolingRate
         temperature = max(temperature, finalTemperature)
-        iteration_scores.append(bestScore)  # Append bestScore at each iteration
 
     end_time = time.time()
     print("Time taken by Annealing: ", "{:.4f}".format(end_time - start_time), " seconds")
 
-    return bestSolution, iteration_scores
+    return bestSolution
 
 
 ### Tabu Search ###
@@ -886,7 +875,6 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
     currentSolution = bestSolution = randomSolution(pizzas, teams)
     bestScore = sum(evaluateSolution(currentSolution, pizzas))
     start_time = time.time()
-    iteration_scores = [bestScore]
 
     # Initialize tabu list with the initial solution
     tabuList = [currentSolution]
@@ -909,8 +897,6 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
             # Add the new solution to the tabu list
             tabuList.append(newSolution)
 
-            iteration_scores.append(bestScore)
-
             # Limit the size of the tabu list
             if len(tabuList) > tabuListSize:
                 tabuList.pop(0)
@@ -918,7 +904,7 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
     end_time = time.time()
     print("Time taken by Tabu: ", "{:.4f}".format(end_time - start_time), " seconds")
 
-    return bestSolution, iteration_scores
+    return bestSolution
 
 
 ### Genetic Algorithm ###
@@ -1015,7 +1001,6 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
     population = initialize_population(pizzas, teams, population_size)
     best_solution = max(population, key=lambda x: sum(evaluateSolution(x, pizzas)))
     best_score = sum(evaluateSolution(best_solution, pizzas))
-    iteration_scores = [best_score]
 
     for generation in range(max_generations):
         new_population = []
@@ -1029,11 +1014,10 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
         if scores[best_solution_index] > best_score:
             best_solution = population[best_solution_index]
             best_score = scores[best_solution_index]
-        iteration_scores.append(best_score)
 
     end_time = time.time()
     print("Time taken by Genetic: ", "{:.4f}".format(end_time - start_time), " seconds")
-    return best_solution, iteration_scores
+    return best_solution
 
 
 ### Hybrid Algorithm (Tabu + Genetic) ###
@@ -1056,9 +1040,8 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
     """
     # Initialize with a solution from Tabu Search
     start_time = time.time()
-    best_solution, tabu_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     best_score = sum(evaluateSolution(best_solution, pizzas))
-    iteration_scores = [best_score]
 
     # Further optimize using Genetic Algorithm
     for _ in range(max_generations):
@@ -1080,12 +1063,11 @@ def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_s
             if scores[best_solution_index] > best_score:
                 best_solution = population[best_solution_index]
                 best_score = scores[best_solution_index]
-            iteration_scores.append(best_score)
 
     end_time = time.time()
     print("Time taken by Hybrid: ", "{:.4f}".format(end_time - start_time), " seconds")
 
-    return best_solution, iteration_scores
+    return best_solution
 
 
 def localOptimalSolution(pizzas, teams):
