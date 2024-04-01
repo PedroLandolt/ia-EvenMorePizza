@@ -179,11 +179,11 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
-        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [15, 20, 40], int)
+        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 15 20 40): ", [15, 20, 40], int)
         if tabuListSizes is None:
             return
         
-        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 10000 20000 30000): ", [8000, 10000, 20000], int)
+        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 8000 10000 20000): ", [8000, 10000, 20000], int)
         if maxIterationsList is None:
             return
     else:
