@@ -371,7 +371,7 @@ def menuRunAll(teams, pizzas, fileName):
     initialTemperature = 10000
     finalTemperature = 0.001
     coolingRate = 0.95
-    best_solution, sa_iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
     
     print("Check the output folder for the solution file: " + fileName + "_default_simulated_annealing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -394,7 +394,7 @@ def menuRunAll(teams, pizzas, fileName):
     print("Tabu Search Solution:")
     tabuListSize = 20
     maxIterations = 10000
-    best_solution, tabu_iteration_score = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     
     print("Check the output folder for the solution file: " + fileName + "_default_tabu_search.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -420,7 +420,7 @@ def menuRunAll(teams, pizzas, fileName):
     mutation_rate = 0.1
     max_generations = 100
     
-    best_solution, ga_iteration_score = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
+    best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_default_genetic_algorithm.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -444,7 +444,7 @@ def menuRunAll(teams, pizzas, fileName):
     tournament_size = 5     # int(input("Enter the tournament size: "))
     mutation_rate = 0.2     # float(input("Enter the mutation rate: "))
     max_generations = 100   # int(input("Enter the maximum number of generations: "))
-    best_solution, hy_iteration_score = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
+    best_solution = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
