@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 
 def clearScreen():
-    print("\033[H\033[J")
+    for _ in range(100):
+        print("\n")
     return
 
 #--------------------------------------------------------------------------------------------------------------#
@@ -41,7 +42,7 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     iterations = int(input("Enter the number of iterations: "))
     
     # Run hill climbing and get the best solution and iteration scores
-    best_solution, iteration_scores = hillClimbing(iterations, pizzas, teams)
+    best_solution = hillClimbing(iterations, pizzas, teams)
     
     print("Check the output folder for the solution file: " + fileName + "_hill_climbing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -57,7 +58,8 @@ def menuRunHillClimbing(teams, pizzas, fileName):
     print("Total score: " + str(sum(scores)))
     
     # Plot the evolution of scores
-    plot_score_evolution(iteration_scores, "Hill Climbing")
+    #iteration_scores = best_solution
+    #plot_score_evolution(iteration_scores, "Hill Climbing")
     
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
@@ -71,7 +73,7 @@ def menuRunSimulatedAnnealing(teams, pizzas, fileName):
     initialTemperature = float(input("Enter the initial temperature: "))
     finalTemperature = float(input("Enter the final temperature: "))
     coolingRate = float(input("Enter the cooling rate: "))
-    best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
     
     print("Check the output folder for the solution file: " + fileName + "_simulated_annealing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -141,6 +143,57 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     menuChooseOptimization(teams, pizzas, fileName)
 
 
+def menuRunHybridTabuGenetic(teams, pizzas, fileName):
+    
+    clearScreen()
+    print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
+    print("\n")
+    tabuListSize    = int(input("Enter the tabu list size: "))
+    maxIterations   = int(input("Enter the maximum number of iterations: "))
+    population_size = int(input("Enter the population size: "))
+    tournament_size = int(input("Enter the tournament size: "))
+    mutation_rate   = float(input("Enter the mutation rate: "))
+    max_generations = int(input("Enter the maximum number of generations: "))
+    best_solution = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
+    
+    print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_hybrid_tabu_genetic.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas, fileName)
+
+
+def menuRunOptimalSolution(teams, pizzas, fileName):
+
+    clearScreen()
+    print("Optimal Solution for " + fileName + " :")
+    print("\n")
+    best_solution = localOptimalSolution(pizzas, teams)
+    
+    print("Check the output folder for the solution file: " + fileName + "_optimal.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_optimal.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    input("\nPress Enter to continue...")
+    menuChooseOptimization(teams, pizzas, fileName)
+
 def menuRunAll(teams, pizzas, fileName):
 
     clearScreen()
@@ -150,7 +203,7 @@ def menuRunAll(teams, pizzas, fileName):
     random_solution = randomSolution(pizzas, teams)
     
     print("Check the output folder for the solution file: " + fileName + "_default_random.out")
-    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension    
     with open("outputs/" + fileName + "_default_random.out", "w") as file:
         file.write(str(len(random_solution)) + "\n")
         for team in random_solution:
@@ -161,9 +214,11 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(random_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in random_solution])))
+    print("Max number of Order: " + str(max([len(team[1]) for team in random_solution])))
     print("\n")
     print("Hill Climbing Solution:")
-    iterations = 1000
+    iterations = 10000
     best_solution = hillClimbing(iterations, pizzas, teams)
     
     print("Check the output folder for the solution file: " + fileName + "_default_hill_climbing.out")
@@ -178,12 +233,14 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     print("\n")
     print("Simulated Annealing Solution:")
-    initialTemperature = 1000
-    finalTemperature = 0.1
-    coolingRate = 0.003
-    best_solution = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
+    initialTemperature = 10000
+    finalTemperature = 0.001
+    coolingRate = 0.95
+    best_solution, iteration_score = simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, coolingRate)
     
     print("Check the output folder for the solution file: " + fileName + "_default_simulated_annealing.out")
     # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
@@ -197,10 +254,12 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     print("\n")
     print("Tabu Search Solution:")
-    tabuListSize = 10
-    maxIterations = 1000
+    tabuListSize = 20
+    maxIterations = 10000
     best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
     
     print("Check the output folder for the solution file: " + fileName + "_default_tabu_search.out")
@@ -215,12 +274,15 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
     print("\n")
     print("Genetic Algorithm Solution:")
     population_size = 100
     tournament_size = 10
     mutation_rate = 0.1
     max_generations = 100
+    
     best_solution = genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations)
     
     print("Check the output folder for the solution file: " + fileName + "_default_genetic_algorithm.out")
@@ -235,6 +297,52 @@ def menuRunAll(teams, pizzas, fileName):
     scores = evaluateSolution(best_solution, pizzas)
     print(scores)
     print("Total score: " + str(sum(scores)))
+    """
+    print("\n")
+    print("Hybrid Tabu Search + Genetic Algorithm Solution for " + fileName + " :")
+    print("\n")
+    tabuListSize = 20       # int(input("Enter the tabu list size: "))
+    maxIterations = 10000   # int(input("Enter the maximum number of iterations: "))
+    population_size = 100   # int(input("Enter the population size: "))
+    tournament_size = 5     # int(input("Enter the tournament size: "))
+    mutation_rate = 0.2     # float(input("Enter the mutation rate: "))
+    max_generations = 100   # int(input("Enter the maximum number of generations: "))
+    best_solution = hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations)
+    
+    print("Check the output folder for the solution file: " + fileName + "_hybrid_tabu_genetic.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_hybrid_tabu_genetic.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    """
+    
+    print("\n")
+    print("Optimal Solution for " + fileName + " :")
+    print("\n")
+    best_solution = localOptimalSolution(pizzas, teams)
+    print("Check the output folder for the solution file: " + fileName + "_default_optimal.out")
+    # Output the solution to a file in the outputs folder with the same name as the input file but with a .out extension
+    with open("outputs/" + fileName + "_default_optimal.out", "w") as file:
+        file.write(str(len(best_solution)) + "\n")
+        for team in best_solution:
+            file.write(str(team[0][10:11:1]) + " " + " ".join([str(pizza[0]) for pizza in team[1]]) + "\n")
+            
+    print("\n")
+    print("Scores from each team:")
+    scores = evaluateSolution(best_solution, pizzas)
+    print(scores)
+    print("Total score: " + str(sum(scores)))
+    print("Number of pizzas assigned: " + str(sum([len(team[1]) for team in best_solution])))
+    print("Max number of Order: " + str(max([len(team[1]) for team in best_solution])))
+    
+        
     input("\nPress Enter to continue...")
     menuChooseOptimization(teams, pizzas, fileName)
 
@@ -248,7 +356,9 @@ def menuChooseOptimization(teams, pizzas, fileName):
     print("3. Simulated Annealing")
     print("4. Tabu Search")
     print("5. Genetic Algorithm")
-    print("7. Run all with default parameters")
+    print("6. Hybrid Tabu Search + Genetic Algorithm")
+    print("7. Local Optimal Solution")
+    print("8. Run all with default parameters")
     print("\n")
     print("0. Go back")
     print("\n")
@@ -268,7 +378,11 @@ def menuChooseOptimization(teams, pizzas, fileName):
         menuRunTabuSearch(teams, pizzas, fileName)
     elif choice == "5":
         menuRunGeneticAlgorithm(teams, pizzas, fileName)
+    elif choice == "6":
+        menuRunHybridTabuGenetic(teams, pizzas, fileName)
     elif choice == "7":
+        menuRunOptimalSolution(teams, pizzas, fileName)
+    elif choice == "8":
         menuRunAll(teams, pizzas, fileName)
     else:
         print("\nInvalid choice!")
@@ -450,44 +564,85 @@ def randomSolution(pizzas, teams):
     Returns:
         list: A list of tuples containing the team and the pizzas assigned to it
     """
-
+    
     lenPizza = len(pizzas)
     cpPizzas = pizzas.copy()
     cpTeams = teams.copy()
 
     pizzasForTeams = []
 
+    totalTeams = int(cpTeams[2]) + int(cpTeams[3]) + int(cpTeams[4])
     solution = []
 
-    while (cpTeams != {}):
-        #print("inside while")
+    while (cpTeams != {} and lenPizza > 0 and totalTeams > 0):
         team = random.choice(list(cpTeams.keys()))
         teamName = "Team with " + str(team) + " members"
         if lenPizza < int(team):
             cpTeams.pop(team)
             continue
         else:
-            while int(cpTeams[team]) > 0:
-                #print("inside while 2")
+            if lenPizza == 0:
+                break
+            num_members = min(int(team), lenPizza)
+            for _ in range(num_members):
                 if lenPizza == 0:
                     break
-                num_members = min(int(team), lenPizza)
-                for _ in range(num_members):
-                    #print("inside for")
-                    if lenPizza == 0:
-                        break
 
-                    #sort cpPizzas by number of ingredients
-                    cpPizzas = dict(sorted(cpPizzas.items(), key=lambda item: len(item[1])))
-                    pizza = list(cpPizzas.keys())[0]
-                    pizzasForTeams.append(pizza)
-                    cpPizzas.pop(pizza)
-                    lenPizza -= 1
-                solution.append((teamName, pizzasForTeams))
-                cpTeams[team] = int(cpTeams[team]) - 1
-                pizzasForTeams = []
-            cpTeams.pop(team)
-
+                #sort cpPizzas by number of ingredients
+                cpPizzas = dict(sorted(cpPizzas.items(), key=lambda item: len(item[1])))
+                pizza = list(cpPizzas.keys())[0]
+                pizzasForTeams.append(pizza)
+                cpPizzas.pop(pizza)
+                lenPizza -= 1
+            solution.append((teamName, pizzasForTeams))
+            totalTeams -= 1
+            pizzasForTeams = []
+            cpTeams[team] = str(int(cpTeams[team]) - 1)
+            if cpTeams[team] == '0':
+                cpTeams.pop(team)
+    
+    """
+    # Testei os outros Algoritmos com o Optimal Solution de base em vez do Random Solution
+    # Qualqer coisa é só descomentar o código acima e comentar o código abaixo
+    # Foi apenas uma questão de testar os algoritmos com um valor de base mais alto
+    # Sort pizzas by number of ingredients
+    pizzas = dict(sorted(pizzas.items(), key=lambda item: len(item[1]), reverse=True))
+    
+    solution = []
+    
+    # Assign pizzas to teams with 4 members
+    for _ in range(int(teams[4])):
+        if len(pizzas) < 4:
+            break
+        team_pizzas = []
+        for _ in range(4):
+            pizza = list(pizzas.keys())[0]
+            team_pizzas.append(pizza)
+            pizzas.pop(pizza)
+        solution.append(("Team with 4 members", team_pizzas))
+        
+    # Assign pizzas to teams with 3 members
+    for _ in range(int(teams[3])):
+        if len(pizzas) < 3:
+            break
+        team_pizzas = []
+        for _ in range(3):
+            pizza = list(pizzas.keys())[0]
+            team_pizzas.append(pizza)
+            pizzas.pop(pizza)
+        solution.append(("Team with 3 members", team_pizzas))
+        
+    # Assign pizzas to teams with 2 members
+    for _ in range(int(teams[2])):
+        if len(pizzas) < 2:
+            break
+        team_pizzas = []
+        for _ in range(2):
+            pizza = list(pizzas.keys())[0]
+            team_pizzas.append(pizza)
+            pizzas.pop(pizza)
+        solution.append(("Team with 2 members", team_pizzas))
+        """
     return solution
 
 ### Hill Climbing ###
@@ -506,21 +661,21 @@ def hillClimbing(iterations, pizzas, teams):
 
     best_solution = randomSolution(pizzas, teams)
     best_score = sum(evaluateSolution(best_solution, pizzas))
+    new_solution = []
+    new_score = 0
+    
 
-    i = 0
-    while i < iterations:
-        i += 1
-        #new_solution = getNeighbourSolution(best_solution)
-        #new_solution = getNeighbourSolution2(best_solution, pizzas)
+    for _ in range(iterations):
         new_solution = getNeighbourSolution3(best_solution, pizzas)
         new_score = sum(evaluateSolution(new_solution, pizzas))
-
+        
         if new_score > best_score:
             best_solution = new_solution
             best_score = new_score
+
         else:
             break
-
+            
     return best_solution
 
 
@@ -552,18 +707,18 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
         newScore = sum(evaluateSolution(newSolution, pizzas))
         scoreDifference = newScore - currentScore
 
-        if scoreDifference > 0:
+        # Accept the new solution if it's better or based on the acceptance probability
+        if scoreDifference > 0 or np.random.rand() < np.exp(scoreDifference / temperature):
             currentSolution = newSolution
             currentScore = newScore
+
+            # Update the best solution if applicable
             if newScore > bestScore:
                 bestSolution = newSolution
                 bestScore = newScore
-        else:
-            if random.random() < np.exp(scoreDifference / temperature):
-                currentSolution = newSolution
-                currentScore = newScore
 
         temperature *= 1 - coolingRate
+        temperature = max(temperature, finalTemperature)
         iteration_scores.append(bestScore)  # Append bestScore at each iteration
 
     return bestSolution, iteration_scores
@@ -571,44 +726,45 @@ def simulatedAnnealing(pizzas, teams, initialTemperature, finalTemperature, cool
 
 ### Tabu Search ###
 def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
-    """Summary: Tabu search optimization algorithm that consists of generating a random solution 
-            and then improving it by swapping pizzas between teams until no improvement is made
+    """
+    Tabu search optimization algorithm for the Even More Pizzas problem.
 
     Args:
-        pizzas (dictionary): Contains the pizzas and their ingredients (key: pizza, value: list of ingredients)
-        teams (dictionary): Contains the number of pizzas each team can have (key: team, value: number of pizzas)
-        tabuListSize (int): Size of the tabu list
-        maxIterations (int): Maximum number of iterations
+        pizzas (dict): Dictionary containing pizzas and their ingredients (key: pizza, value: list of ingredients).
+        teams (dict): Dictionary containing the number of pizzas each team can have (key: team, value: number of pizzas).
+        tabuListSize (int): Size of the tabu list.
+        maxIterations (int): Maximum number of iterations.
 
     Returns:
-        list: A list of tuples containing the team and the pizzas assigned to it
+        list: A list of tuples containing the team and the pizzas assigned to it.
     """
 
-    currentSolution = randomSolution(pizzas, teams)
-    currentScore = sum(evaluateSolution(currentSolution, pizzas))
-    bestSolution = currentSolution
-    bestScore = currentScore
-    tabuList = []
-    tabuList.append(currentSolution)
-    tabuListSize = tabuListSize
-    maxIterations = maxIterations
-    i = 0
+    # Initialize current solution and best solution
+    currentSolution = bestSolution = randomSolution(pizzas, teams)
+    bestScore = sum(evaluateSolution(currentSolution, pizzas))
 
-    while i < maxIterations:
-        i += 1
-        #newSolution = getNeighbourSolution(currentSolution)
-        #newSolution = getNeighbourSolution2(currentSolution, pizzas)
+    # Initialize tabu list with the initial solution
+    tabuList = [currentSolution]
+
+    for _ in range(maxIterations):
+        # Generate a new neighbor solution
         newSolution = getNeighbourSolution3(currentSolution, pizzas)
-
         newScore = sum(evaluateSolution(newSolution, pizzas))
 
-        if newSolution not in tabuList:
+        # Check if the new solution is not tabu or leads to improvement
+        if newSolution not in tabuList or newScore > bestScore:
+            # Update the best solution if the new solution is better
             if newScore > bestScore:
                 bestSolution = newSolution
                 bestScore = newScore
+                
+            # Update the current solution
             currentSolution = newSolution
-            currentScore = newScore
+            
+            # Add the new solution to the tabu list
             tabuList.append(newSolution)
+
+            # Limit the size of the tabu list
             if len(tabuList) > tabuListSize:
                 tabuList.pop(0)
 
@@ -619,7 +775,7 @@ def tabuSearch(pizzas, teams, tabuListSize, maxIterations):
 
 ### Initialize Population ###
 def initialize_population(pizzas, teams, population_size):
-    """Summary: Initialize the population with random solutions
+    """Initialize the population with random solutions.
 
     Args:
         pizzas (dictionary): Contains the pizzas and their ingredients (key: pizza, value: list of ingredients)
@@ -629,15 +785,14 @@ def initialize_population(pizzas, teams, population_size):
     Returns:
         list: A list of the population
     """
-
-    population = []
-    for _ in range(population_size):
-        population.append(randomSolution(pizzas, teams))
+    print("Initializing Population")
+    population = [randomSolution(pizzas, teams) for _ in range(population_size)]
     return population
 
 ### Tournament Selection ###
 def tournament_selection(population, tournament_size, pizzas):
-    """Summary: Select 2 parents using tournament selection
+    
+    """ Select 2 parents using tournament selection.
 
     Args:
         population (list): A list of solutions
@@ -647,16 +802,18 @@ def tournament_selection(population, tournament_size, pizzas):
     Returns:
         list: A list of 2 selected parents
     """
-
-    selected_parents = []
-    for _ in range(2):  # Select 2 parents
-        tournament_candidates = random.sample(population, tournament_size)
-        selected_parents.append(max(tournament_candidates, key=lambda x: sum(evaluateSolution(x, pizzas))))
-    return selected_parents
+    print("Tournament Selection")
+    tournament = random.sample(population, tournament_size)
+    tournament_scores = [sum(evaluateSolution(solution, pizzas)) for solution in tournament]
+    parent1 = tournament[tournament_scores.index(max(tournament_scores))]
+    tournament.remove(parent1)
+    tournament_scores.remove(max(tournament_scores))
+    parent2 = tournament[tournament_scores.index(max(tournament_scores))]
+    return parent1, parent2
 
 ### Single Point Crossover ###
 def single_point_crossover(parents):
-    """Summary: Perform single point crossover on the parents
+    """Perform single point crossover on the parents.
 
     Args:
         parents (list): A list of 2 parents
@@ -664,21 +821,17 @@ def single_point_crossover(parents):
     Returns:
         list: A list of 2 children
     """
-
-    min_length = min(len(parents[0]), len(parents[1]))
     
-    if min_length <= 1:
-        # If either parent has length 1 or less, cannot perform crossover
-        return parents
-
-    crossover_point = random.randint(1, min_length - 1)
-    child1 = parents[0][:crossover_point] + parents[1][crossover_point:]
-    child2 = parents[1][:crossover_point] + parents[0][crossover_point:]
+    print("Single Point Crossover")
+    parent1, parent2 = parents
+    crossover_point = random.randint(0, min(len(parent1), len(parent2)))
+    child1 = parent1[:crossover_point] + parent2[crossover_point:]
+    child2 = parent2[:crossover_point] + parent1[crossover_point:]
     return child1, child2
 
 ### Mutation ###
 def mutation(solution, mutation_rate, pizzas):
-    """Summary: Perform mutation on the solution
+    """Perform mutation on the solution.
 
     Args:
         solution (list): A list of tuples containing the team and the pizzas assigned to it
@@ -688,18 +841,18 @@ def mutation(solution, mutation_rate, pizzas):
     Returns:
         list: A mutated solution
     """
-
+    
+    print("Mutation")
     mutated_solution = solution.copy()
-    for i, team in enumerate(mutated_solution):
+    for i, (team, pizzas_assigned) in enumerate(mutated_solution):
         if random.random() < mutation_rate:
-            random_pizza_index = random.randint(0, len(team[1]) - 1)
-            mutated_solution[i][1][random_pizza_index] = random.choice(list(pizzas.keys()))
+            if pizzas_assigned:
+                random_pizza = random.choice(pizzas_assigned)
+                mutated_solution[i] = (team, [random_pizza])
     return mutated_solution
 
-### Genetic Algorithm ###
 def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_rate, max_generations):
-    """Summary: Genetic algorithm optimization algorithm that consists of generating a random population 
-            and then improving it by performing selection, crossover, and mutation operations
+    """Genetic algorithm optimization algorithm.
 
     Args:
         pizzas (dictionary): Contains the pizzas and their ingredients (key: pizza, value: list of ingredients)
@@ -712,33 +865,123 @@ def genetic_algorithm(pizzas, teams, population_size, tournament_size, mutation_
     Returns:
         list: A list of tuples containing the team and the pizzas assigned to it
     """
-
+    
+    print("Genetic Algorithm")
     population = initialize_population(pizzas, teams, population_size)
-    best_solution = None
-    best_score = float('-inf')
-    generation = 0
+    best_solution = max(population, key=lambda x: sum(evaluateSolution(x, pizzas)))
+    best_score = sum(evaluateSolution(best_solution, pizzas))
+    iteration_scores = [best_score]
 
-    while generation < max_generations:
+    for generation in range(max_generations):
         new_population = []
-
+        print("New Population: ")
         for _ in range(population_size // 2):
-            parents = tournament_selection(population, tournament_size, pizzas)
-            offspring1, offspring2 = single_point_crossover(parents)
-            offspring1 = mutation(offspring1, mutation_rate, pizzas)
-            offspring2 = mutation(offspring2, mutation_rate, pizzas)
-            new_population.extend([offspring1, offspring2])
-
+            print("Population Size: ", population_size)
+            parent1, parent2 = tournament_selection(population, tournament_size, pizzas)
+            child1, child2 = single_point_crossover([parent1, parent2])
+            new_population.extend([mutation(child1, mutation_rate, pizzas), mutation(child2, mutation_rate, pizzas)])
         population = new_population
-        generation += 1
+        scores = [sum(evaluateSolution(solution, pizzas)) for solution in population]
+        best_solution_index = scores.index(max(scores))
+        if scores[best_solution_index] > best_score:
+            print("Best Solution Index: ", best_solution_index)
+            best_solution = population[best_solution_index]
+            best_score = scores[best_solution_index]
+        iteration_scores.append(best_score)
+    return best_solution
 
-        # Evaluate population and update best solution
-        for solution in population:
-            score = sum(evaluateSolution(solution, pizzas))
-            if score > best_score:
-                best_solution = solution
-                best_score = score
+
+### Hybrid Algorithm (Tabu + Genetic) ###
+def hybrid_tabu_genetic(pizzas, teams, tabuListSize, maxIterations, population_size, tournament_size, mutation_rate, max_generations):
+    """
+    Hybrid algorithm combining Tabu Search and Genetic Algorithm.
+
+    Args:
+        pizzas (dictionary): Contains the pizzas and their ingredients (key: pizza, value: list of ingredients)
+        teams (dictionary): Contains the number of pizzas each team can have (key: team, value: number of pizzas)
+        tabuListSize (int): Size of the tabu list in Tabu Search
+        maxIterations (int): Maximum number of iterations in Tabu Search
+        population_size (int): Size of the population in Genetic Algorithm
+        tournament_size (int): Size of the tournament selection in Genetic Algorithm
+        mutation_rate (float): Mutation rate in Genetic Algorithm
+        max_generations (int): Maximum number of generations in Genetic Algorithm
+
+    Returns:
+        list: A list of tuples containing the team and the pizzas assigned to it
+    """
+    # Initialize with a solution from Tabu Search
+    best_solution = tabuSearch(pizzas, teams, tabuListSize, maxIterations)
+    best_score = sum(evaluateSolution(best_solution, pizzas))
+
+    # Further optimize using Genetic Algorithm
+    for _ in range(max_generations):
+        # Generate initial population
+        population = initialize_population(pizzas, teams, population_size)
+
+        # Run Genetic Algorithm
+        for _ in range(max_generations):
+            new_population = []
+            for _ in range(population_size // 2):
+                parent1, parent2 = tournament_selection(population, tournament_size, pizzas)
+                child1, child2 = single_point_crossover([parent1, parent2])
+                new_population.extend([mutation(child1, mutation_rate, pizzas), mutation(child2, mutation_rate, pizzas)])
+            population = new_population
+
+            # Evaluate and update best solution
+            scores = [sum(evaluateSolution(solution, pizzas)) for solution in population]
+            best_solution_index = scores.index(max(scores))
+            if scores[best_solution_index] > best_score:
+                best_solution = population[best_solution_index]
+                best_score = scores[best_solution_index]
 
     return best_solution
+
+
+def localOptimalSolution(pizzas, teams):
+    
+    # Sort pizzas by number of ingredients
+    pizzas = dict(sorted(pizzas.items(), key=lambda item: len(item[1]), reverse=True))
+    
+    solution = []
+    
+    # Assign pizzas to teams with 4 members
+    for _ in range(int(teams[4])):
+        if len(pizzas) < 4:
+            break
+        team_pizzas = []
+        for _ in range(4):
+            pizza = list(pizzas.keys())[0]
+            team_pizzas.append(pizza)
+            pizzas.pop(pizza)
+        solution.append(("Team with 4 members", team_pizzas))
+        
+    # Assign pizzas to teams with 3 members
+    for _ in range(int(teams[3])):
+        if len(pizzas) < 3:
+            break
+        team_pizzas = []
+        for _ in range(3):
+            pizza = list(pizzas.keys())[0]
+            team_pizzas.append(pizza)
+            pizzas.pop(pizza)
+        solution.append(("Team with 3 members", team_pizzas))
+        
+    # Assign pizzas to teams with 2 members
+    for _ in range(int(teams[2])):
+        if len(pizzas) < 2:
+            break
+        team_pizzas = []
+        for _ in range(2):
+            pizza = list(pizzas.keys())[0]
+            team_pizzas.append(pizza)
+            pizzas.pop(pizza)
+        solution.append(("Team with 2 members", team_pizzas))
+        
+    return solution
+
+
+
+#--------------------------------------------------------------------------------------------------------------#
 
 def plot_score_evolution(iteration_scores, algorithm_name):
     plt.plot(range(len(iteration_scores)), iteration_scores)
