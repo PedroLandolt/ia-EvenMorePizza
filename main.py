@@ -163,11 +163,11 @@ def menuRunTabuSearch(teams, pizzas, fileName):
     run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
-        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [10, 20, 30])
+        tabuListSizes = get_parameters("Enter the tabu list sizes for each run, separated by whitespaces (default: 10 20 30): ", [10, 20, 30], int)
         if tabuListSizes is None:
             return
         
-        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 10000 20000 30000): ", [10000, 20000, 30000])
+        maxIterationsList = get_parameters("Enter the maximum iterations for each run, separated by whitespaces (default: 10000 20000 30000): ", [10000, 20000, 30000], int)
         if maxIterationsList is None:
             return
     else:
@@ -226,11 +226,11 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
     run_multiple_times = input("Do you want to run the algorithm multiple times for comparison? (yes/no): ").lower()
     
     if run_multiple_times == "yes" or run_multiple_times == "y":
-        population_sizes = get_parameters("Enter the population sizes for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300])
+        population_sizes = get_parameters("Enter the population sizes for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300], int)
         if population_sizes is None:
             return
         
-        tournament_sizes = get_parameters("Enter the tournament sizes for each run, separated by whitespaces (default: 5 10 15): ", [5, 10, 15])
+        tournament_sizes = get_parameters("Enter the tournament sizes for each run, separated by whitespaces (default: 5 10 15): ", [5, 10, 15], int)
         if tournament_sizes is None:
             return
         
@@ -238,7 +238,7 @@ def menuRunGeneticAlgorithm(teams, pizzas, fileName):
         if mutation_rates is None:
             return
         
-        max_generations_list = get_parameters("Enter the maximum generations for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300])
+        max_generations_list = get_parameters("Enter the maximum generations for each run, separated by whitespaces (default: 100 200 300): ", [100, 200, 300], int)
         if max_generations_list is None:
             return
     else:
@@ -1146,12 +1146,12 @@ def plot_score_evolution(iteration_scores, algorithm_name):
     plt.title('Evolution of Score during ' + algorithm_name)
     plt.show()
 
-def get_parameters(prompt, default_values):
+def get_parameters(prompt, default_values, data_type=float):
     user_input = input(prompt)
     if user_input == "":
         values_list = default_values
     else:
-        values_list = [float(i) for i in user_input.split()]
+        values_list = [data_type(i) for i in user_input.split()]
         if len(values_list) < 2 or len(values_list) > 3:
             print(f"Please enter minimum 2 and maximum 3 values.")
             return None
